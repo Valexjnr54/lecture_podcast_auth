@@ -1,8 +1,9 @@
-const express = require('express')
+const jwt = require('jsonwebtoken')
 const createError = require('http-errors')
 const Student = require('../../models/StudentModel')
 const { studentAuthSchema, loginSchema } = require('../../helpers/validation_schema')
 const { signAccessToken, signRefreshToken, logoutToken } = require('../../helpers/jwt_helper')
+const { Config } = require('../../config/config')
 
 const registerStudent = async (request,response,next) => {
     try {
@@ -12,8 +13,13 @@ const registerStudent = async (request,response,next) => {
             throw createError.Conflict(`${result.email} already exist`)
         const student = new Student(result)
         const savedStudent = await student.save()
-        const accessToken = await signAccessToken(savedStudent.id)
-        const refreshToken = await signRefreshToken(savedStudent.id)
+        if (!Config.Jwt_secret) {
+            console.error('Jwt_secret is not defined!');
+            res.status(500).json({ message: 'Internal Server Error' });
+            return;
+        }
+        // Generate a JWT token for the newly registered Student
+        const token = jwt.sign({ studentId: savedStudent._id, email: savedStudent.email, fullname: savedStudent.fullname }, Config.Jwt_secret);
         response.status(201).json({student: savedStudent, token: accessToken, refresh_token: refreshToken})
     } catch (error) {
         if(error.isJoi === true) error.status = 422
@@ -29,9 +35,14 @@ const loginStudent = async (request,response,next) => {
             throw createError.Unauthorized(`Unauthorized Student`)
         const isMatch = await student.isValidPassword(result.password)
         if(!isMatch) throw createError.Unauthorized('Invalid Email/Password')
-        const accessToken = await signAccessToken(student.id)
-        const refreshToken = await signRefreshToken(student.id)
-        response.status(201).json({student: student, token: accessToken, refresh_token: refreshToken})
+        if (!Config.Jwt_secret) {
+            console.error('Jwt_secret is not defined!');
+            res.status(500).json({ message: 'Internal Server Error' });
+            return;
+        }
+        // Generate a JWT token for the newly registered Admin
+        const token = jwt.sign({ studentId: student._id, email: student.email, fullname: student.fullname }, Config.Jwt_secret);
+        response.status(201).json({student: student, token})
     } catch (error) {
         if(error.isJoi === true) return next(createError.BadRequest('Invalid Email/Password'))
         next(error)
@@ -59,7 +70,7 @@ const logoutStudent = async (request,response,next) => {
 
 const profileStudent = async (request, response, next) => {
     try {
-        const userId = request.payload.aud
+        const userId = request.user.studentId
         const student = await Student.findOne({ _id: userId})
         if(!student)
             throw createError.NotFound(`Student Not Found`)

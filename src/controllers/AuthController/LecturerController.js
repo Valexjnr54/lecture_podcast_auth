@@ -1,8 +1,9 @@
-const express = require('express')
+const jwt = require('jsonwebtoken');
 const createError = require('http-errors')
 const Lecturer = require('../../models/LecturerModel')
 const { authSchema, loginSchema } = require('../../helpers/validation_schema')
 const { signAccessToken, signRefreshToken, logoutToken } = require('../../helpers/jwt_helper')
+const { Config } = require('../../config/config')
 
 const registerLecturer = async (request,response,next) => {
     try {
@@ -12,9 +13,14 @@ const registerLecturer = async (request,response,next) => {
             throw createError.Conflict(`${result.email} already exist`)
         const lecturer = new Lecturer(result)
         const savedLecturer = await lecturer.save()
-        const accessToken = await signAccessToken(savedLecturer.id)
-        const refreshToken = await signRefreshToken(savedLecturer.id)
-        response.status(201).json({lecturer: savedLecturer, token: accessToken})
+        if (!Config.Jwt_secret) {
+            console.error('Jwt_secret is not defined!');
+            res.status(500).json({ message: 'Internal Server Error' });
+            return;
+        }
+        // Generate a JWT token for the newly registered Admin
+        const token = jwt.sign({ lecturerId: savedLecturer._id, email: savedLecturer.email, fullname: savedLecturer.fullname }, Config.Jwt_secret);
+        response.status(201).json({lecturer: savedLecturer, token})
     } catch (error) {
         if(error.isJoi === true) error.status = 422
         next(error)
@@ -29,10 +35,14 @@ const loginLecturer = async (request,response,next) => {
             throw createError.NotFound(`Lecturer Not Found`)
         const isMatch = await lecturer.isValidPassword(result.password)
         if(!isMatch) throw createError.Unauthorized('Invalid Email/Password')
-        // const savedLecturer = await lecturer.save()
-        const accessToken = await signAccessToken(lecturer.id)
-        const refreshToken = await signRefreshToken(lecturer.id)
-        response.status(201).json({lecturer: lecturer, token: accessToken})
+        if (!Config.Jwt_secret) {
+            console.error('Jwt_secret is not defined!');
+            res.status(500).json({ message: 'Internal Server Error' });
+            return;
+        }
+        // Generate a JWT token for the newly registered Admin
+        const token = jwt.sign({ lecturerId: lecturer._id, email: lecturer.email, fullname: lecturer.fullname }, Config.Jwt_secret);
+        response.status(201).json({lecturer: lecturer, token})
     } catch (error) {
         if(error.isJoi === true) return next(createError.BadRequest('Invalid Email/Password'))
         next(error)
@@ -60,7 +70,7 @@ const logoutLecturer = async (request,response,next) => {
 
 const profileLecturer = async (request, response, next) => {
     try {
-        const userId = request.payload.aud
+        const userId = request.user.lecturerId
         const lecturer = await Lecturer.findOne({ _id: userId})
         if(!lecturer)
             throw createError.NotFound(`Lecturer Not Found`)

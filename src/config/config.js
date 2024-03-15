@@ -1,8 +1,32 @@
+const dotenv = require('dotenv');
+
+dotenv.config({ path: __dirname + '/../../.env' });
+
 const Config = {
-    secret: process.env.JWT_SECRET || 'eyJhbGciOiJIUzI1NiJ9.eyJSb2xlIjoiQWRtaW4iLCJJc3N1ZXIiOiJJc3N1ZXIiLCJVc2VybmFtZSI6IkphdmFJblVzZSIsImV4cCI6MTcwNjg3NjE5MywiaWF0IjoxNzA2ODc2MTkzfQ.T4DRYd3sP8BEyoxcJCP8zdA3R2A5MzmABX8HwTsdkmw',
-    refresh_secret: process.env.JWT_REFRESH_SECRET || 'eyJhbGciOiJIUzI1NiJ9.eyJSb2xlIjoiQWRtaW4iLCJJc3N1ZXIiOiJJc3N1ZXIiLCJVc2VybmFtZSI6IkphdmFJblVzZSIsImV4cCI6MTcwNjg3NjE5MywiaWF0IjoxNzA2ODc2MTkzfQ.YiSKdNDG--NL-TECYNyaZxeGeIBvDhl0CzFMoFKev9s',
-    corsAllowedOrigin: process.env.CORS_ALLOWED_ORIGIN || '*',
+    Jwt_secret: process.env.JWT_SECRET,
+    secret: process.env.JWT_SECRET,
+    corsAllowedOrigin: process.env.CORS_ALLOWED_ORIGIN,
+    port: process.env.PORT,
 };
 
+const emailConfig = {
+    host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+    port: parseInt(process.env.EMAIL_PORT || '465', 10),
+    secure: process.env.EMAIL_SECURE === 'true' || false,
+    auth: {
+      user: process.env.EMAIL_USER || 'qmarthub@gmail.com',
+      pass: process.env.EMAIL_PASSWORD || 'fukpospayyoomzlv',
+    },
+};
 
-module.exports = { Config }
+const cloudinaryConfig = {
+  name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+};
+
+module.exports = {
+    Config,
+    emailConfig,
+    cloudinaryConfig
+};

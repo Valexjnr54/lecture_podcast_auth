@@ -1,6 +1,6 @@
 const express = require('express')
 const {registerLecturer, loginLecturer, logoutLecturer, profileLecturer} = require('../../controllers/AuthController/LecturerController');
-const { verifyAccessToken } = require('../../helpers/jwt_helper')
+const { authenticateJWT } = require('../../middlewares/authMiddleware/authenticationMiddleware');
 const router = express.Router()
 
 // LecturerAuthRouter.post('/register-lecturer', registerLecturer);
@@ -8,7 +8,7 @@ router.post('/register-lecturer', registerLecturer);
 
 router.post('/login-lecturer', loginLecturer);
 
-router.post('/logout-lecturer', verifyAccessToken, logoutLecturer);
-router.get('/lecturer-profile', verifyAccessToken, profileLecturer );
+router.post('/logout-lecturer', authenticateJWT, logoutLecturer);
+router.get('/lecturer-profile', authenticateJWT, profileLecturer );
 
 module.exports = router
