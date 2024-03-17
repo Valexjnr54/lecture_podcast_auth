@@ -20,7 +20,7 @@ const registerStudent = async (request,response,next) => {
         }
         // Generate a JWT token for the newly registered Student
         const token = jwt.sign({ studentId: savedStudent._id, email: savedStudent.email, fullname: savedStudent.fullname }, Config.Jwt_secret);
-        response.status(201).json({student: savedStudent, token: accessToken, refresh_token: refreshToken})
+        response.status(201).json({student: savedStudent, token})
     } catch (error) {
         if(error.isJoi === true) error.status = 422
         next(error)
