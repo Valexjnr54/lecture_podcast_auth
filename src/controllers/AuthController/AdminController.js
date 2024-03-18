@@ -46,7 +46,7 @@ const loginAdmin = async (request,response,next) => {
         }
         // Generate a JWT token for the newly registered Admin
         const token = jwt.sign({ adminId: admin._id, email: admin.email, fullname: admin.fullname }, Config.Jwt_secret);
-        response.status(201).json({admin: admin, token: accessToken, refresh_token: refreshToken})
+        response.status(201).json({admin: admin, token})
     } catch (error) {
         if(error.isJoi === true) return next(createError.BadRequest('Invalid Email/Password'))
         next(error)
