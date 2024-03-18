@@ -14,21 +14,16 @@ require('dotenv').config()
 require('./helpers/init_mongoose')
 
 const app = express();
-app.use(morgan('dev'))
-app.use(express.json());
-app.use(
-  express.urlencoded({
-    extended: false,
-  })
-);
+app.use(morgan("combined"));
 
+app.use(express.json());
 app.use(
   bodyParser.urlencoded({
     extended: false,
   })
 );
 
-app.use(cors({ origin: Config.corsAllowedOrigin }));
+app.use(cors({ origin: Config.corsAllowedOrigin || '*' }));
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
@@ -62,6 +57,6 @@ app.use((err,req,res,next) => {
     })
 })
 
-
+app.use(express.urlencoded({ extended: true }));
 
 module.exports = app;
