@@ -1,10 +1,10 @@
 const express = require('express')
 const morgan = require('morgan')
+const cors = require('cors')
 const createError = require('http-errors')
 const bodyParser = require('body-parser')
 const Config = require('./config/config')
 require('./helpers/init_redis')
-// const rateLimiter = require('rate-limiter-flexible')
 const LecturerAuthRouter = require('./routes/Auths/lecturerAuthRoutes')
 const LearnerAuthRouter = require('./routes/Auths/studentAuthRoutes')
 const AdminAuthRouter = require('./routes/Auths/adminAuthRoutes')
@@ -22,13 +22,18 @@ app.use(
   })
 );
 
-// app.use(rateLimiter);
+app.use(
+  bodyParser.urlencoded({
+    extended: false,
+  })
+);
+
+app.use(cors({ origin: Config.corsAllowedOrigin }));
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   next();
 });
-
 
 const route = "/api/v1"
 
