@@ -1,4 +1,5 @@
 const { validationResult, body } = require('express-validator');
+const createError = require('http-errors')
 const { Request, Response } =  require('express')
 const Lecturer = require('../../models/LecturerModel')
 const ContentLibrary = require('../../models/contentLibrary')
@@ -10,7 +11,6 @@ async function createVideoContent(request, response) {
     const { course_title, course_code, content_category } = request.body;
     const lecturer_id = request.user.lecturerId
     try {
-
         const validationRules = [
             body('course_title').notEmpty().withMessage('Course Titlt is required'),
             body('content_category').notEmpty().withMessage('Content Category is required'),
@@ -26,7 +26,7 @@ async function createVideoContent(request, response) {
 
         const lecturer = await Lecturer.findOne({ _id: lecturer_id})
         if(!lecturer){
-            throw createError.NotFound(`Lecturer Not Found`)
+            return response.status(404).json({ message: "Lecturer Not Found"})
         }
 
         if (!request.files || !('video' in request.files)) {
@@ -117,7 +117,7 @@ async function createAudioContent(request, response) {
 
         const lecturer = await Lecturer.findOne({ _id: lecturer_id})
         if(!lecturer)
-            throw createError.NotFound(`Lecturer Not Found`)
+            return response.status(404).json({ message: "Lecturer Not Found"})
     
             if (!request.files || !('audio' in request.files)) {
                 return response.status(400).json({ message: 'Please provide an audio File.' });
@@ -201,7 +201,7 @@ async function createFileContent(request, response) {
 
         const lecturer = await Lecturer.findOne({ _id: lecturer_id})
         if(!lecturer)
-            throw createError.NotFound(`Lecturer Not Found`)
+            return response.status(404).json({ message: "Lecturer Not Found"})
         
         if (!request.files || !('document' in request.files)) {
             return response.status(400).json({ message: 'Please provide a document file.' });
@@ -286,7 +286,7 @@ async function createContent(request, response) {
 
         const lecturer = await Lecturer.findOne({ _id: lecturer_id})
         if(!lecturer)
-            throw createError.NotFound(`Lecturer Not Found`)
+            return response.status(404).json({ message: "Lecturer Not Found"})
     
         let thumbnail = null;
         
@@ -336,10 +336,10 @@ async function allContent(request, response){
     try{
         const lecturer = await Lecturer.findOne({ _id: lecturer_id})
         if(!lecturer)
-            throw createError.NotFound(`Lecturer Not Found`)
+            return response.status(404).json({ message: "Lecturer Not Found"})
         const contents = await ContentLibrary.find({ lecturer_id })
         if(!contents)
-            throw createError.NotFound(`Lecturer Has No Content yet`)
+            return response.status(404).json({ message: "Lecturer has no content yet"})
         return response.status(200).json({ message: 'Contents Fetch successfully', contents });
     }catch(error){
         console.log(error);
@@ -353,10 +353,10 @@ async function singleContent(request, response){
     try{
         const lecturer = await Lecturer.findOne({ _id: lecturer_id})
         if(!lecturer)
-            throw createError.NotFound(`Lecturer Not Found`)
+            return response.status(404).json({ message: "Lecturer Not Found"})
         const content = await ContentLibrary.findById({ _id })
         if(!content)
-            throw createError.NotFound(`Content Not Found`)
+            return response.status(404).json({ message: "Content Not Found"}).NotFound(`Content Not Found`)
         return response.status(200).json({ message: 'Content Fetched successfully', content });
     }catch(error){
         console.log(error);
@@ -386,12 +386,12 @@ async function updateVideoContent(request, response) {
 
         const lecturer = await Lecturer.findOne({ _id: lecturer_id });
         if (!lecturer) {
-            throw createError.NotFound(`Lecturer Not Found`);
+            return response.status(404).json({ message: "Lecturer Not Found"});
         }
 
         const check_owner = await ContentLibrary.findOne({ _id, lecturer_id });
         if (!check_owner) {
-            throw createError.NotFound(`Content Does not belong to this lecturer`);
+            return response.status(404).json({ message: "Content does not belong to this lecturer"});
         }
 
         let content_url = null;
@@ -485,12 +485,12 @@ async function updateAudioContent(request, response) {
 
         const lecturer = await Lecturer.findOne({ _id: lecturer_id });
         if (!lecturer) {
-            throw createError.NotFound(`Lecturer Not Found`);
+            return response.status(404).json({ message: "Lecturer Not Found"});
         }
 
         const check_owner = await ContentLibrary.findOne({ _id, lecturer_id });
         if (!check_owner) {
-            throw createError.NotFound(`Content Does not belong to this lecturer`);
+            return response.status(404).json({ message: "Content does not belong to this lecturer"});
         }
 
         let content_url = null;
@@ -585,12 +585,12 @@ async function updateFileContent(request, response) {
 
         const lecturer = await Lecturer.findOne({ _id: lecturer_id });
         if (!lecturer) {
-            throw createError.NotFound(`Lecturer Not Found`);
+            return response.status(404).json({ message: "Lecturer Not Found"});
         }
 
         const check_owner = await ContentLibrary.findOne({ _id, lecturer_id });
         if (!check_owner) {
-            throw createError.NotFound(`Content Does not belong to this lecturer`);
+            return response.status(404).json({ message: "Content does not belong to this lecturer"});
         }
 
         let content_url = null;
@@ -692,12 +692,12 @@ async function updateContent(request, response) {
 
         const lecturer = await Lecturer.findOne({ _id: lecturer_id });
         if (!lecturer) {
-            throw createError.NotFound(`Lecturer Not Found`);
+            return response.status(404).json({ message: "Lecturer Not Found"});
         }
 
         const check_owner = await ContentLibrary.findOne({ _id, lecturer_id });
         if (!check_owner) {
-            throw createError.NotFound(`Content Does not belong to this lecturer`);
+            return response.status(404).json({ message: "Content does not belong to this lecturer"});
         }
 
         let thumbnail = null;
@@ -755,12 +755,12 @@ async function deleteContent(request, response) {
     try {
         const lecturer = await Lecturer.findOne({ _id: lecturer_id });
         if (!lecturer) {
-            throw createError.NotFound(`Lecturer Not Found`);
+            return response.status(404).json({ message: "Lecturer Not Found"});
         }
 
         const check_owner = await ContentLibrary.findOne({ _id, lecturer_id });
         if (!check_owner) {
-            throw createError.NotFound(`Content Does not belong to this lecturer`);
+            return response.status(404).json({ message: "Content does not belong to this lecturer"});
         }
 
         // Perform the update operation
