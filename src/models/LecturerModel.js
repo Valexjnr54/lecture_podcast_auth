@@ -18,6 +18,10 @@ const LecturerSchema = new Schema({
         type: String,
         required: true,
     },
+    profile_image:{
+        type:String,
+        default:null
+    },
     area_of_expertise :{
         type: String,
         required: true,

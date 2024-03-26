@@ -14,6 +14,10 @@ const AdminSchema = new Schema({
         lowercase: true,
         unique:true,
     },
+    profile_image:{
+        type:String,
+        default:null
+    },
     password:{
         type: String,
         required: true

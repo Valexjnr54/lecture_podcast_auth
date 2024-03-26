@@ -9,6 +9,9 @@ const LecturerAuthRouter = require('./routes/Auths/lecturerAuthRoutes')
 const LearnerAuthRouter = require('./routes/Auths/studentAuthRoutes')
 const AdminAuthRouter = require('./routes/Auths/adminAuthRoutes')
 const contentRouter = require('./routes/Lecturer/contentLibrary')
+const settingLecturerRouter = require('./routes/Lecturer/settings')
+const settingStudentRouter = require('./routes/Student/studentSettings')
+const settingAdminRouter = require('./routes/Admin/adminSettings')
 const refreshTokenRouter = require('./routes/refreshTokenRoutes')
 require('dotenv').config()
 require('./helpers/init_mongoose')
@@ -42,6 +45,10 @@ app.use(route+"/auth",AdminAuthRouter)
 app.use(route,refreshTokenRouter)
 
 app.use(route+"/lecturer/content", contentRouter)
+app.use(route+"/lecturer/settings", settingLecturerRouter)
+
+app.use(route+"/student/settings", settingStudentRouter)
+app.use(route+"/admin/settings", settingAdminRouter)
 
 app.use(async (req,res,next) => {
     next(createError.NotFound())

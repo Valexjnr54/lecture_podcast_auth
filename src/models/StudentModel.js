@@ -18,6 +18,10 @@ const StudentSchema = new Schema({
         type: String,
         required: true,
     },
+    profile_image:{
+        type:String,
+        default:null
+    },
     password:{
         type: String,
         required: true
