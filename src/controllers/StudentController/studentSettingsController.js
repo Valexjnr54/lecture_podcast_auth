@@ -175,7 +175,7 @@ const forgotPassword = async (req, res, next) => {
     }
 
     const resetToken = jwt.sign({ email: user.email }, Config.Jwt_secret, {
-      expiresIn: "10m",
+      expiresIn: "12m",
     });
 
     await sendResetPasswordEmail(user.email, user, resetToken);
