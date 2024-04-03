@@ -9,7 +9,7 @@ const { isDocumentFile } = require('../../services/verification')
 const fs = require('fs');
 
 async function changePassword(request, response) {
-    const { old_password, new_password, confirm_new_password } = request.body;
+    const { old_password, new_password } = request.body;
     const lecturer_id = request.user.lecturerId
     if (!lecturer_id) {
         return response.status(403).json({ message: 'Unauthorized User' });
@@ -17,8 +17,7 @@ async function changePassword(request, response) {
     try {
         const validationRules = [
             body('old_password').notEmpty().withMessage('Old Password is required'),
-            body('new_password').isLength({ min: 10 }).withMessage('Password must be at least 16 characters long'),
-            body('confirm_new_password').isLength({ min: 10 }).withMessage('Confirm Password must be at least 16 characters long'),
+            body('new_password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long'),
         ];
         
         // Apply validation rules to the request
@@ -42,10 +41,6 @@ async function changePassword(request, response) {
             if (!passwordMatch) {
                 return response.status(401).json({ error: 'Old Password Mismatch' });
             }
-        }
-
-        if (new_password !== confirm_new_password) {
-            return response.status(401).json({ error: 'Password Mismatch' });
         }
 
         // Hash the password before storing it
