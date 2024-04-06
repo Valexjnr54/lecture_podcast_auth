@@ -150,14 +150,14 @@ async function sendReject(email, deliveryDetail) {
   }
 }
 
-async function sendResetPasswordEmail(email, user, resetToken) {
+async function sendResetPasswordEmail(email, user, resetToken, userType) {
   const templatePath = path.join(
     __dirname,
     "../templates/email-templates/reset-password.ejs"
   );
   const template = fs.readFileSync(templatePath, "utf-8");
 
-  const url = `${Config.appRootURL}/reset-password/${resetToken}`;
+  const url = `${Config.appRootURL}/api/v1/${userType}/settings/reset-password/${resetToken}`;
 
   const mailOptions = {
     from: "no-reply@example.com",
@@ -174,6 +174,30 @@ async function sendResetPasswordEmail(email, user, resetToken) {
   }
 }
 
+async function sendVerificationEmail(user, verificationToken) {
+  const templatePath = path.join(
+    __dirname,
+    "../templates/email-templates/verification-email.ejs"
+  );
+  const template = fs.readFileSync(templatePath, "utf-8");
+
+  const url = `${Config.appRootURL}/api/v1/auth/verify-email?token=${verificationToken}`;
+
+  const mailOptions = {
+    from: "no-reply@example.com",
+    to: email,
+    subject: "Verify Your Email Address",
+    html: ejs.render(template, { user: { fullname: user.fullname }, url }),
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log("Verification email sent successfully.");
+  } catch (error) {
+    console.error("Error sending verification email:", error);
+  }
+}
+
 module.exports = {
   sendReceiptEmail,
   sendCompletionEmail,
@@ -182,4 +206,5 @@ module.exports = {
   sendApproval,
   sendReject,
   sendResetPasswordEmail,
+  sendVerificationEmail,
 };
