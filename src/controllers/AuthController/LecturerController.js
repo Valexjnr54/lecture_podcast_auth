@@ -43,7 +43,7 @@ const registerLecturer = async (request, response, next) => {
     const savedLecturer = await lecturer.save();
 
     // Send verification email
-    await sendVerificationEmail(savedLecturer, verificationToken);
+    await sendVerificationEmail(savedLecturer, verificationToken, "lecturer");
 
     response.status(201).json({ lecturer: savedLecturer });
   } catch (error) {
@@ -190,7 +190,7 @@ const resendVerificationEmail = async (request, response, next) => {
     await user.save();
 
     // Send the verification email with the new token
-    await sendVerificationEmail(user, verificationToken);
+    await sendVerificationEmail(user, verificationToken, "lecturer");
 
     response.status(200).json({
       success: true,

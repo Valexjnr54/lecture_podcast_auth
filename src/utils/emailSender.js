@@ -174,14 +174,14 @@ async function sendResetPasswordEmail(email, user, resetToken, userType) {
   }
 }
 
-async function sendVerificationEmail(user, verificationToken) {
+async function sendVerificationEmail(user, verificationToken, userType) {
   const templatePath = path.join(
     __dirname,
     "../templates/email-templates/verification-email.ejs"
   );
   const template = fs.readFileSync(templatePath, "utf-8");
 
-  const url = `${Config.appRootURL}/api/v1/auth/verify-email?token=${verificationToken}`;
+  const url = `${Config.appRootURL}/api/v1/auth/$${userType}/verify-email?token=${verificationToken}`;
 
   const mailOptions = {
     from: "no-reply@example.com",
