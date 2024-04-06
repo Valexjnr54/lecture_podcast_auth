@@ -185,7 +185,7 @@ async function sendVerificationEmail(user, verificationToken) {
 
   const mailOptions = {
     from: "no-reply@example.com",
-    to: email,
+    to: user.email,
     subject: "Verify Your Email Address",
     html: ejs.render(template, { user: { fullname: user.fullname }, url }),
   };
