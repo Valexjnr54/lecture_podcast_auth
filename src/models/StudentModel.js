@@ -32,13 +32,26 @@ const StudentSchema = new Schema({
   resetTokenExpire: {
     type: Date,
   },
+  isVerified: {
+    type: Boolean,
+    default: false, // Initially set to false
+  },
+  verificationToken: {
+    type: String,
+  },
+  verificationTokenExpire: {
+    type: Date,
+  },
 });
 
 StudentSchema.pre("save", async function (next) {
   try {
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(this.password, salt);
-    this.password = hashedPassword;
+    if (this.isNew) {
+      // Check if the document is newly created
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(this.password, salt);
+      this.password = hashedPassword;
+    }
     next();
   } catch (error) {
     next(error);
