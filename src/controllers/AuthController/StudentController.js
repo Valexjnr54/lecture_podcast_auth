@@ -47,7 +47,7 @@ const registerStudent = async (request, response, next) => {
     const savedStudent = await student.save();
 
     // Send verification email
-    await sendVerificationEmail(savedStudent, verificationToken);
+    await sendVerificationEmail(savedStudent, verificationToken, "student");
 
     response.status(201).json({ student: savedStudent });
   } catch (error) {
@@ -185,7 +185,7 @@ const resendVerificationEmail = async (request, response, next) => {
     await user.save();
 
     // Send the verification email with the new token
-    await sendVerificationEmail(user, verificationToken);
+    await sendVerificationEmail(user, verificationToken, "student");
 
     response.status(200).json({
       success: true,
