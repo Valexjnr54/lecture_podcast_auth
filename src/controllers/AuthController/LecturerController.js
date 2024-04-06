@@ -8,6 +8,17 @@ const {
   logoutToken,
 } = require("../../helpers/jwt_helper");
 const { Config } = require("../../config/config");
+const { sendVerificationEmail } = require("../../utils/emailSender");
+
+const generateVerificationToken = (email) => {
+  return jwt.sign({ email: email }, Config.Jwt_secret, {
+    expiresIn: "1d", // Token expires in 1 day
+  });
+};
+
+const generateVerificationTokenExpiry = () => {
+  return new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+};
 
 const registerLecturer = async (request, response, next) => {
   try {
@@ -120,10 +131,82 @@ const getAllLecturers = async (request, response, next) => {
   }
 };
 
+const verifyEmail = async (request, response, next) => {
+  try {
+    const { token } = request.query;
+    const decoded = jwt.verify(token, Config.Jwt_secret);
+    const lecturer = await Lecturer.findOne({ email: decoded.email });
+
+    if (!lecturer) {
+      throw createError.NotFound("User not found");
+    }
+
+    if (lecturer.isVerified) {
+      return response
+        .status(400)
+        .json({ message: "Email is already verified." });
+    }
+
+    // Check if the verification token has expired
+    const currentTime = new Date();
+    if (currentTime > decoded.exp) {
+      throw createError.BadRequest("Verification token has expired");
+    }
+
+    // Update the user's verification status
+    lecturer.isVerified = true;
+    await lecturer.save();
+
+    response.status(200).json({ message: "Email verified successfully" });
+  } catch (error) {
+    console.error("Error verifying email:", error);
+    next(error);
+  }
+};
+
+const resendVerificationEmail = async (request, response, next) => {
+  try {
+    const { email } = request.body;
+    // Find the user by email
+    const user = await Lecturer.findOne({ email });
+
+    if (!user) {
+      throw createError.NotFound(`User with email ${email} does not exist`);
+    }
+
+    if (user.isVerified) {
+      return response
+        .status(400)
+        .json({ message: "Email is already verified." });
+    }
+
+    // Generate a new verification token
+    const verificationToken = generateVerificationToken(email);
+    const verificationTokenExpiry = generateVerificationTokenExpiry();
+
+    // Update the user's document with the new verification token and expiration time
+    user.verificationToken = verificationToken;
+    user.verificationTokenExpire = verificationTokenExpiry;
+    await user.save();
+
+    // Send the verification email with the new token
+    await sendVerificationEmail(user, verificationToken);
+
+    response.status(200).json({
+      success: true,
+      message: "Verification email resent successfully.",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   registerLecturer,
   loginLecturer,
   logoutLecturer,
   profileLecturer,
   getAllLecturers,
+  verifyEmail,
+  resendVerificationEmail,
 };

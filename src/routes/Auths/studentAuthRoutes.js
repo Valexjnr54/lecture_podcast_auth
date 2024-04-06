@@ -5,6 +5,7 @@ const {
   logoutStudent,
   profileStudent,
   verifyEmail,
+  resendVerificationEmail,
 } = require("../../controllers/AuthController/StudentController");
 const {
   authenticateJWT,
@@ -18,6 +19,8 @@ router.post("/login-student", loginStudent);
 router.post("/logout-student", authenticateJWT, logoutStudent);
 router.get("/student-profile", authenticateJWT, profileStudent);
 
-router.get("/verify-email", verifyEmail);
+router.get("/student/verify-email", verifyEmail);
+
+router.post("/student/resend-verification-email", resendVerificationEmail);
 
 module.exports = router;
