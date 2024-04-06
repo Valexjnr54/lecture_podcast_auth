@@ -178,7 +178,7 @@ const forgotPassword = async (req, res, next) => {
       expiresIn: "12m",
     });
 
-    await sendResetPasswordEmail(user.email, user, resetToken);
+    await sendResetPasswordEmail(user.email, user, resetToken, "student");
 
     res.status(200).json({
       success: true,
@@ -194,14 +194,14 @@ const resetPassword = async (req, res, next) => {
     const { resetToken } = req.params;
     let { password } = req.body;
 
-    const decoded = jwt.verify(resetToken, Config.JWT_SECRET);
+    const decoded = jwt.verify(resetToken, Config.Jwt_secret);
     const user = await Student.findOne({ email: decoded.email });
+    console.log(user);
 
     if (!user) {
       return next(createError(404, "User not found"));
     }
 
-    password = await bcrypt.hash(password, 10);
     user.password = password;
     await user.save();
 

@@ -14,23 +14,27 @@ const registerLecturer = async (request, response, next) => {
     const result = await authSchema.validateAsync(request.body);
     const doesExist = await Lecturer.findOne({ email: result.email });
     if (doesExist) throw createError.Conflict(`${result.email} already exist`);
-    const lecturer = new Lecturer(result);
-    const savedLecturer = await lecturer.save();
-    if (!Config.Jwt_secret) {
-      console.error("Jwt_secret is not defined!");
-      res.status(500).json({ message: "Internal Server Error" });
-      return;
-    }
-    // Generate a JWT token for the newly registered Admin
-    const token = jwt.sign(
+
+    const verificationToken = jwt.sign(
+      { email: result.email },
+      Config.Jwt_secret,
       {
-        lecturerId: savedLecturer._id,
-        email: savedLecturer.email,
-        fullname: savedLecturer.fullname,
-      },
-      Config.Jwt_secret
+        expiresIn: "1d", // Token expires in 1 day
+      }
     );
-    response.status(201).json({ lecturer: savedLecturer, token });
+
+    // Save the verification token with the user data
+    const lecturer = new Lecturer({
+      ...result,
+      verificationToken,
+    });
+
+    const savedLecturer = await lecturer.save();
+
+    // Send verification email
+    await sendVerificationEmail(savedLecturer, verificationToken);
+
+    response.status(201).json({ lecturer: savedLecturer });
   } catch (error) {
     if (error.isJoi === true) error.status = 422;
     next(error);
@@ -41,15 +45,25 @@ const loginLecturer = async (request, response, next) => {
   try {
     const result = await loginSchema.validateAsync(request.body);
     const lecturer = await Lecturer.findOne({ email: result.email });
-    if (!lecturer) throw createError.NotFound(`Lecturer Not Found`);
+    if (!lecturer) throw createError.Unauthorized(`Unauthorized lecturer`);
+
+    // Check if the email is verified
+    if (!lecturer.isVerified) {
+      throw createError.Unauthorized(
+        `Email not verified. Please check your inbox for the verification email.`
+      );
+    }
+
     const isMatch = await lecturer.isValidPassword(result.password);
-    if (!isMatch) throw createError.Unauthorized("Invalid Email/Password");
+    if (!isMatch) {
+      throw createError.Unauthorized("Invalid Email/Password");
+    }
     if (!Config.Jwt_secret) {
       console.error("Jwt_secret is not defined!");
       res.status(500).json({ message: "Internal Server Error" });
       return;
     }
-    // Generate a JWT token for the newly registered Admin
+    // Generate a JWT token for the logged-in lecturer
     const token = jwt.sign(
       {
         lecturerId: lecturer._id,
