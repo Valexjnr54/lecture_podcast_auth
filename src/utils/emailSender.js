@@ -181,7 +181,7 @@ async function sendVerificationEmail(user, verificationToken, userType) {
   );
   const template = fs.readFileSync(templatePath, "utf-8");
 
-  const url = `${Config.appRootURL}/api/v1/auth/$${userType}/verify-email?token=${verificationToken}`;
+  const url = `https://lecture-podcast-dahboard.netlify.app/${userType}/verify?token=${verificationToken}`;
 
   const mailOptions = {
     from: "no-reply@example.com",
