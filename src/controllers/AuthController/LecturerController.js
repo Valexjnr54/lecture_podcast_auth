@@ -149,7 +149,8 @@ const verifyEmail = async (request, response, next) => {
 
     // Check if the verification token has expired
     const currentTime = new Date();
-    if (currentTime > decoded.exp) {
+    const tokenExpiration = new Date(decoded.exp * 1000); // Convert seconds to milliseconds
+    if (currentTime > tokenExpiration) {
       throw createError.BadRequest("Verification token has expired");
     }
 
