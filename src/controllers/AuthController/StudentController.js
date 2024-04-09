@@ -51,7 +51,7 @@ const registerStudent = async (request, response, next) => {
 
     response
       .status(201)
-      .json({ student: savedStudent, success: true, status: 201 });
+      .json({ data: savedStudent, success: true, status: 201 });
   } catch (error) {
     if (error.isJoi === true) error.status = 422;
     next(error);
@@ -91,7 +91,7 @@ const loginStudent = async (request, response, next) => {
     );
     response
       .status(201)
-      .json({ student: student, token, success: true, status: 201 });
+      .json({ data: student, token, success: true, status: 201 });
   } catch (error) {
     if (error.isJoi === true)
       return next(createError.BadRequest("Invalid Email/Password"));
