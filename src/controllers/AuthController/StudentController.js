@@ -84,7 +84,7 @@ const loginStudent = async (request, response, next) => {
       return;
     }
     // Generate a JWT token for the logged-in student
-    const token = jwt.sign(
+    const verificationToken = jwt.sign(
       {
         studentId: student._id,
         email: student.email,
@@ -92,9 +92,10 @@ const loginStudent = async (request, response, next) => {
       },
       Config.Jwt_secret
     );
-    response
-      .status(201)
-      .json({ data: student, token, success: true, status: 201 });
+
+    student.verificationToken = verificationToken;
+
+    response.status(201).json({ data: student, success: true, status: 201 });
   } catch (error) {
     if (error.isJoi === true)
       return next(createError.BadRequest("Invalid Email/Password"));
