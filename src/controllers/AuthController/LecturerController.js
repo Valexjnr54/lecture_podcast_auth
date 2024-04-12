@@ -80,7 +80,7 @@ const loginLecturer = async (request, response, next) => {
       return;
     }
     // Generate a JWT token for the logged-in lecturer
-    const token = jwt.sign(
+    const verificationToken = jwt.sign(
       {
         lecturerId: lecturer._id,
         email: lecturer.email,
@@ -88,9 +88,12 @@ const loginLecturer = async (request, response, next) => {
       },
       Config.Jwt_secret
     );
+
+    lecturer.verificationToken = verificationToken;
+
     response
       .status(201)
-      .json({ data: lecturer, token, status: 201, success: true });
+      .json({ data: { lecturer }, token, status: 201, success: true });
   } catch (error) {
     if (error.isJoi === true)
       return next(createError.BadRequest("Invalid Email/Password"));
