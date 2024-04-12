@@ -50,7 +50,10 @@ const registerLecturer = async (request, response, next) => {
       .json({ data: savedLecturer, success: true, status: 201 });
   } catch (error) {
     if (error.isJoi === true) error.status = 422;
-    next(error);
+    response
+      .status(error.status || 500)
+      .json({ message: error.message, success: false, status: error.status });
+    // next(error);
   }
 };
 
