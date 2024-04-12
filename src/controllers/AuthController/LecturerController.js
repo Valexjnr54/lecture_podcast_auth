@@ -93,7 +93,7 @@ const loginLecturer = async (request, response, next) => {
 
     response
       .status(201)
-      .json({ data: { lecturer }, token, status: 201, success: true });
+      .json({ data: lecturer, token, status: 201, success: true });
   } catch (error) {
     if (error.isJoi === true)
       return next(createError.BadRequest("Invalid Email/Password"));
