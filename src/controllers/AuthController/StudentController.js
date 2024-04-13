@@ -128,7 +128,7 @@ const profileStudent = async (request, response, next) => {
     const userId = request.user.studentId;
     const student = await Student.findOne({ _id: userId });
     if (!student) throw createError.NotFound(`Student Not Found`);
-    response.status(200).json({ student: student });
+    response.status(200).json({ status: 200, message:"Student Profile Fetched Successfully", data: student });
   } catch (error) {
     console.log(error);
   }
