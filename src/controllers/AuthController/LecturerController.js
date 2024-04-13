@@ -135,7 +135,7 @@ const profileLecturer = async (request, response, next) => {
 const getAllLecturers = async (request, response, next) => {
   try {
     const lecturers = await Lecturer.find();
-    response.status(200).json({ lecturers });
+    response.status(200).json({ status: 200, message:"Lecturers Fetched Successfully", data:lecturers });
   } catch (error) {
     next(error);
   }
