@@ -17,7 +17,7 @@ const registerAdmin = async (request,response,next) => {
         // const refreshToken = await signRefreshToken(savedAdmin.id)
         if (!Config.Jwt_secret) {
             console.error('Jwt_secret is not defined!');
-            res.status(500).json({ message: 'Internal Server Error' });
+            res.status(500).json({ status: 500, message: 'Internal Server Error', data:{} });
             return;
         }
         // Generate a JWT token for the newly registered Admin
@@ -41,7 +41,7 @@ const loginAdmin = async (request,response,next) => {
         // const refreshToken = await signRefreshToken(admin.id)
         if (!Config.Jwt_secret) {
             console.error('Jwt_secret is not defined!');
-            res.status(500).json({ message: 'Internal Server Error' });
+            res.status(500).json({ status: 500, message: 'Internal Server Error', data:{} });
             return;
         }
         // Generate a JWT token for the newly registered Admin
@@ -68,7 +68,7 @@ const logoutAdmin = async (request,response,next) => {
       } catch (error) {
         // Handle any potential errors that may occur during the logout process.
         console.error('Error during logout:', error);
-        response.status(500).json({ message: 'Internal Server Error' });
+        response.status(500).json({ status: 500, message: 'Internal Server Error',data:{} });
       }
 }
 

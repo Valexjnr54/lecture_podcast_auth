@@ -12,7 +12,7 @@ async function changePassword(request, response) {
     const { old_password, new_password } = request.body;
     const admin_id = request.user.adminId
     if (!admin_id) {
-        return response.status(403).json({ message: 'Unauthorized User' });
+        return response.status(403).json({ status: 403, message: 'Unauthorized User', data:{} });
     }
     try {
         const validationRules = [
@@ -30,7 +30,7 @@ async function changePassword(request, response) {
 
         const admin = await Admin.findOne({ _id: admin_id})
         if(!admin){
-            return response.status(404).json({ message: "Admin Not Found"})
+            return response.status(404).json({ status: 404, message: "Admin Not Found", data:{}})
         }
         const password = admin.password;
 
@@ -47,10 +47,10 @@ async function changePassword(request, response) {
         const hashedPassword = await bcrypt.hash(new_password, 10);
         const update = await Admin.findOneAndUpdate( {_id: admin_id},{password: hashedPassword}, {new:true})
     
-        return response.status(200).json({ message:"Password Updated Successfully", data:update})
+        return response.status(200).json({ status: 200, message:"Password Updated Successfully", data:update})
     } catch (error) {
         console.log(error);
-        return response.status(500).json({message:"Internal Server Error"})
+        return response.status(500).json({status: 500, message:"Internal Server Error", data: {}})
     }
 }
 
@@ -59,13 +59,13 @@ async function changeProfileImage(request, response) {
 
     // Check if user_id is not present or undefined
     if (!admin_id) {
-        return response.status(403).json({ message: 'Unauthorized User' });
+        return response.status(403).json({ status: 403, message: 'Unauthorized User', data:{} });
     }
     try {
         // Retrieve the user by user_id
         const admin = await Admin.findById( { _id: admin_id } );
         if (!admin) {
-            return response.status(404).json({ message: "Admin Not Found" });
+            return response.status(404).json({ status: 404, message: "Admin Not Found", data: {} });
         }
 
         // Uploading Image to Cloudinary
@@ -87,13 +87,13 @@ async function changeProfileImage(request, response) {
                 }
             });
         } else {
-            return response.status(400).json({ message: 'No file uploaded' });
+            return response.status(400).json({ status: 400, message: 'No file uploaded', data:{} });
         }
 
         const admin_updated = await Admin.findOneAndUpdate({ _id: admin_id },{ profile_image }, {new:true} );
-        return response.status(200).json({ message: 'Admin profile image updated', data:admin_updated });
+        return response.status(200).json({ status: 200, message: 'Admin profile image updated', data:admin_updated });
     } catch (error) {
-        return response.status(500).json({ message: error });
+        return response.status(500).json({ status: 500, message: error, data: {} });
     }
 }
 
@@ -103,7 +103,7 @@ async function updateDetails(request, response) {
 
     // Check if user_id is not present or undefined
     if (!admin_id) {
-        return response.status(403).json({ message: 'Unauthorized User' });
+        return response.status(403).json({ status: 403, message: 'Unauthorized User', data:{} });
     }
     try {
         const validationRules = [
@@ -122,7 +122,7 @@ async function updateDetails(request, response) {
         // Retrieve the user by user_id
         const admin = await Admin.findById({ _id: admin_id } );
         if (!admin) {
-            return response.status(404).json({ message: "Admin Not Found" });
+            return response.status(404).json({ status: 404, message: "Admin Not Found", data:{} });
         }
 
         const user = await Admin.findOneAndUpdate(
@@ -131,10 +131,10 @@ async function updateDetails(request, response) {
             {new: true}
         );
 
-        return response.status(200).json({ message: 'Admin profile updated', data:user });
+        return response.status(200).json({ status: 200, message: 'Admin profile updated', data:user });
 
     } catch (error) {
-        return response.status(500).json({ message: error });
+        return response.status(500).json({ status: 500, message: error, data:{} });
     }
 }
 

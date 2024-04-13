@@ -26,15 +26,15 @@ async function createVideoContent(request, response) {
 
         const lecturer = await Lecturer.findOne({ _id: lecturer_id})
         if(!lecturer){
-            return response.status(404).json({ message: "Lecturer Not Found"})
+            return response.status(404).json({ status: 404, message: "Lecturer Not Found"})
         }
 
         if (!request.files || !('video' in request.files)) {
-            return response.status(400).json({ message: 'Please provide a video File.' });
+            return response.status(400).json({ status: 400, message: 'Please provide a video File.' });
         }
         const videoFile = request.files.video;
         if (typeof videoFile.mimetype === 'string' && !videoFile.mimetype.startsWith('video/')) {
-            return response.status(400).json({ message: 'Please provide a valid video file.' });
+            return response.status(400).json({ status: 400, message: 'Please provide a valid video file.' });
         }
         let content_url
         try {
@@ -52,7 +52,7 @@ async function createVideoContent(request, response) {
             content_url = contentUrl
         } catch (error) {
             console.error("Error uploading video:", error);
-            return response.status(400).json({ error: 'Error uploading video', message: `${error}` });
+            return response.status(400).json({ error: 'Error uploading video', status: 400, message: `${error}` });
         }
         
         let thumbnail = null;
@@ -72,7 +72,7 @@ async function createVideoContent(request, response) {
                 });
             } catch (error) {
                 console.error("Error uploading thumbnail:", error);
-                return response.status(400).json({ error: 'Error uploading thumbnail', message: `${error}` });
+                return response.status(400).json({ error: 'Error uploading thumbnail', status: 400, message: `${error}` });
             }
         }
         
@@ -88,12 +88,12 @@ async function createVideoContent(request, response) {
         });
         
         await content.save();
-        return response.status(201).json({ message: 'Content added successfully', content });
+        return response.status(201).json({ status: 201, message: 'Content added successfully', data:content });
         
 
     } catch (error) {
         console.log(error);
-        return response.status(500).json({ message: 'Internal Server Error' });
+        return response.status(500).json({ status: 500, message: 'Internal Server Error' });
     }
 }
 
@@ -117,10 +117,10 @@ async function createAudioContent(request, response) {
 
         const lecturer = await Lecturer.findOne({ _id: lecturer_id})
         if(!lecturer)
-            return response.status(404).json({ message: "Lecturer Not Found"})
+            return response.status(404).json({ status: 404, message: "Lecturer Not Found"})
     
             if (!request.files || !('audio' in request.files)) {
-                return response.status(400).json({ message: 'Please provide an audio File.' });
+                return response.status(400).json({ status: 400, message: 'Please provide an audio File.' });
             }
             const audioFile = request.files.audio;
             let content_url;
@@ -136,7 +136,7 @@ async function createAudioContent(request, response) {
                 content_url = contentUrl
             }catch(error){
                 console.error("Error uploading audio:", error);
-                return response.status(400).json({ error: 'Error uploading audio', message: `${error}` });
+                return response.status(400).json({ error: 'Error uploading audio', status: 400, message: `${error}` });
             }
 
             let thumbnail = null;
@@ -155,7 +155,7 @@ async function createAudioContent(request, response) {
                     });
                 } catch (error) {
                     console.error("Error uploading thumbnail:", error);
-                    return response.status(400).json({ error: 'Error uploading thumbnail', message: `${error}` });
+                    return response.status(400).json({ error: 'Error uploading thumbnail', status: 400, message: `${error}` });
                 }
             }
     
@@ -172,12 +172,12 @@ async function createAudioContent(request, response) {
             });
     
             await content.save();
-            return response.status(201).json({ message: 'Content added successfully', content });
+            return response.status(201).json({ status: 201, message: 'Content added successfully', data:content });
     
 
     } catch (error) {
         console.log(error);
-        return response.status(500).json({ message: 'Internal Server Error' });
+        return response.status(500).json({ status: 500, message: 'Internal Server Error' });
     }
 }
 
@@ -201,10 +201,10 @@ async function createFileContent(request, response) {
 
         const lecturer = await Lecturer.findOne({ _id: lecturer_id})
         if(!lecturer)
-            return response.status(404).json({ message: "Lecturer Not Found"})
+            return response.status(404).json({ status: 404, message: "Lecturer Not Found"})
         
         if (!request.files || !('document' in request.files)) {
-            return response.status(400).json({ message: 'Please provide a document file.' });
+            return response.status(400).json({ status: 400, message: 'Please provide a document file.' });
         }
         
         const uploadedFile = request.files.document;
@@ -212,7 +212,7 @@ async function createFileContent(request, response) {
         // Check if the mimetype of the uploaded file represents a document file type
         const isDocument = await isDocumentFile(uploadedFile[0].mimetype);
         if (!isDocument) {
-            return response.status(400).json({ message: 'Please provide a valid document file.' });
+            return response.status(400).json({ status: 400, message: 'Please provide a valid document file.' });
         }
 
         const content_url = await uploadFile(request.files['document'][0].path, 'lecture_podcast/documents/content_library_documents');
@@ -241,7 +241,7 @@ async function createFileContent(request, response) {
                     });
                 } catch (error) {
                     console.error("Error uploading thumbnail:", error);
-                    return response.status(400).json({ error: 'Error uploading thumbnail', message: `${error}` });
+                    return response.status(400).json({ error: 'Error uploading thumbnail', status: 400, message: `${error}` });
                 }
             }
 
@@ -257,11 +257,11 @@ async function createFileContent(request, response) {
             });
     
             await content.save();
-            return response.status(201).json({ message: 'Content added successfully', content });
+            return response.status(201).json({ status: 201, message: 'Content added successfully', data:content });
 
     } catch (error) {
         console.log(error);
-        return response.status(500).json({ message: 'Internal Server Error' });
+        return response.status(500).json({ status: 500, message: 'Internal Server Error' });
     }
 }
 
@@ -286,7 +286,7 @@ async function createContent(request, response) {
 
         const lecturer = await Lecturer.findOne({ _id: lecturer_id})
         if(!lecturer)
-            return response.status(404).json({ message: "Lecturer Not Found"})
+            return response.status(404).json({ status: 404, message: "Lecturer Not Found"})
     
         let thumbnail = null;
         
@@ -305,7 +305,7 @@ async function createContent(request, response) {
                 });
             } catch (error) {
                 console.error("Error uploading thumbnail:", error);
-                return response.status(400).json({ error: 'Error uploading thumbnail', message: `${error}` });
+                return response.status(400).json({ error: 'Error uploading thumbnail', status: 400, message: `${error}` });
             }
         }
 
@@ -323,11 +323,11 @@ async function createContent(request, response) {
         });
 
         await content.save();
-        return response.status(201).json({ message: 'Content added successfully', content });
+        return response.status(201).json({ status: 201, message: 'Content added successfully', data:content });
 
     } catch (error) {
         console.log(error);
-        return response.status(500).json({ message: 'Internal Server Error' });
+        return response.status(500).json({ status: 500, message: 'Internal Server Error' });
     }
 }
 
@@ -336,14 +336,14 @@ async function allContent(request, response){
     try{
         const lecturer = await Lecturer.findOne({ _id: lecturer_id})
         if(!lecturer)
-            return response.status(404).json({ message: "Lecturer Not Found"})
+            return response.status(404).json({ status: 404, message: "Lecturer Not Found"})
         const contents = await ContentLibrary.find({ lecturer_id })
         if(!contents)
-            return response.status(404).json({ message: "Lecturer has no content yet"})
-        return response.status(200).json({ message: 'Contents Fetch successfully', contents });
+            return response.status(404).json({ status: 404, message: "Lecturer has no content yet"})
+        return response.status(200).json({ status: 200, message: 'Contents Fetch successfully', data:contents });
     }catch(error){
         console.log(error);
-        return response.status(500).json({ message: 'Internal Server Error' });
+        return response.status(500).json({ status: 500, message: 'Internal Server Error' });
     }
 }
 
@@ -353,14 +353,14 @@ async function singleContent(request, response){
     try{
         const lecturer = await Lecturer.findOne({ _id: lecturer_id})
         if(!lecturer)
-            return response.status(404).json({ message: "Lecturer Not Found"})
+            return response.status(404).json({ status: 404, message: "Lecturer Not Found"})
         const content = await ContentLibrary.findById({ _id })
         if(!content)
-            return response.status(404).json({ message: "Content Not Found"}).NotFound(`Content Not Found`)
-        return response.status(200).json({ message: 'Content Fetched successfully', content });
+            return response.status(404).json({ status: 404, message: "Content Not Found"}).NotFound(`Content Not Found`)
+        return response.status(200).json({ status: 200, message: 'Content Fetched successfully', data:content });
     }catch(error){
         console.log(error);
-        return response.status(500).json({ message: 'Internal Server Error' });
+        return response.status(500).json({ status: 500, message: 'Internal Server Error' });
     }
 }
 
@@ -386,12 +386,12 @@ async function updateVideoContent(request, response) {
 
         const lecturer = await Lecturer.findOne({ _id: lecturer_id });
         if (!lecturer) {
-            return response.status(404).json({ message: "Lecturer Not Found"});
+            return response.status(404).json({ status: 404, message: "Lecturer Not Found"});
         }
 
         const check_owner = await ContentLibrary.findOne({ _id, lecturer_id });
         if (!check_owner) {
-            return response.status(404).json({ message: "Content does not belong to this lecturer"});
+            return response.status(404).json({ status: 404, message: "Content does not belong to this lecturer"});
         }
 
         let content_url = null;
@@ -410,7 +410,7 @@ async function updateVideoContent(request, response) {
                 });
             } catch (error) {
                 console.error("Error uploading video:", error);
-                return response.status(400).json({ error: 'Error uploading video', message: `${error}` });
+                return response.status(400).json({ error: 'Error uploading video', status: 400, message: `${error}` });
             }
         }
 
@@ -429,7 +429,7 @@ async function updateVideoContent(request, response) {
                 });
             } catch (error) {
                 console.error("Error uploading thumbnail:", error);
-                return response.status(400).json({ error: 'Error uploading thumbnail', message: `${error}` });
+                return response.status(400).json({ error: 'Error uploading thumbnail', status: 400, message: `${error}` });
             }
         }
 
@@ -455,11 +455,11 @@ async function updateVideoContent(request, response) {
             updateObject, // Update object with conditional fields
             { new: true } // To return the updated document
         );
-        return response.status(200).json({ message: 'Content updated successfully', content: updatedContent });
+        return response.status(200).json({ status: 200, message: 'Content updated successfully', data: updatedContent });
 
     } catch (error) {
         console.log(error);
-        return response.status(500).json({ message: 'Internal Server Error' });
+        return response.status(500).json({ status: 500, message: 'Internal Server Error' });
     }
 }
 
@@ -485,12 +485,12 @@ async function updateAudioContent(request, response) {
 
         const lecturer = await Lecturer.findOne({ _id: lecturer_id });
         if (!lecturer) {
-            return response.status(404).json({ message: "Lecturer Not Found"});
+            return response.status(404).json({ status: 404, message: "Lecturer Not Found"});
         }
 
         const check_owner = await ContentLibrary.findOne({ _id, lecturer_id });
         if (!check_owner) {
-            return response.status(404).json({ message: "Content does not belong to this lecturer"});
+            return response.status(404).json({ status: 404, message: "Content does not belong to this lecturer"});
         }
 
         let content_url = null;
@@ -509,7 +509,7 @@ async function updateAudioContent(request, response) {
                 });
             } catch (error) {
                 console.error("Error uploading audio:", error);
-                return response.status(400).json({ error: 'Error uploading audio', message: `${error}` });
+                return response.status(400).json({ error: 'Error uploading audio', status: 400, message: `${error}` });
             }
         }
 
@@ -528,7 +528,7 @@ async function updateAudioContent(request, response) {
                 });
             } catch (error) {
                 console.error("Error uploading thumbnail:", error);
-                return response.status(400).json({ error: 'Error uploading thumbnail', message: `${error}` });
+                return response.status(400).json({ error: 'Error uploading thumbnail', status: 400, message: `${error}` });
             }
         }
 
@@ -555,11 +555,11 @@ async function updateAudioContent(request, response) {
             updateObject, // Update object with conditional fields
             { new: true } // To return the updated document
         );
-        return response.status(200).json({ message: 'Content updated successfully', content: updatedContent });
+        return response.status(200).json({ status: 200, message: 'Content updated successfully', data: updatedContent });
 
     } catch (error) {
         console.log(error);
-        return response.status(500).json({ message: 'Internal Server Error' });
+        return response.status(500).json({ status: 500, message: 'Internal Server Error' });
     }
 }
 
@@ -585,12 +585,12 @@ async function updateFileContent(request, response) {
 
         const lecturer = await Lecturer.findOne({ _id: lecturer_id });
         if (!lecturer) {
-            return response.status(404).json({ message: "Lecturer Not Found"});
+            return response.status(404).json({ status: 404, message: "Lecturer Not Found"});
         }
 
         const check_owner = await ContentLibrary.findOne({ _id, lecturer_id });
         if (!check_owner) {
-            return response.status(404).json({ message: "Content does not belong to this lecturer"});
+            return response.status(404).json({ status: 404, message: "Content does not belong to this lecturer"});
         }
 
         let content_url = null;
@@ -599,7 +599,7 @@ async function updateFileContent(request, response) {
             // Check if the mimetype of the uploaded file represents a document file type
             const isDocument = await isDocumentFile(uploadedFile[0].mimetype);
             if (!isDocument) {
-                return response.status(400).json({ message: 'Please provide a valid document file.' });
+                return response.status(400).json({ status: 400, message: 'Please provide a valid document file.' });
             }
 
             try {
@@ -615,7 +615,7 @@ async function updateFileContent(request, response) {
                 });
             } catch (error) {
                 console.error("Error uploading file:", error);
-                return response.status(400).json({ error: 'Error uploading file', message: `${error}` });
+                return response.status(400).json({ error: 'Error uploading file', status: 400, message: `${error}` });
             }
         }
 
@@ -634,7 +634,7 @@ async function updateFileContent(request, response) {
                 });
             } catch (error) {
                 console.error("Error uploading thumbnail:", error);
-                return response.status(400).json({ error: 'Error uploading thumbnail', message: `${error}` });
+                return response.status(400).json({ error: 'Error uploading thumbnail', status: 400, message: `${error}` });
             }
         }
 
@@ -661,11 +661,11 @@ async function updateFileContent(request, response) {
             updateObject, // Update object with conditional fields
             { new: true } // To return the updated document
         );
-        return response.status(200).json({ message: 'Content updated successfully', content: updatedContent });
+        return response.status(200).json({ status: 200, message: 'Content updated successfully', data: updatedContent });
 
     } catch (error) {
         console.log(error);
-        return response.status(500).json({ message: 'Internal Server Error' });
+        return response.status(500).json({ status: 500, message: 'Internal Server Error' });
     }
 }
 
@@ -692,12 +692,12 @@ async function updateContent(request, response) {
 
         const lecturer = await Lecturer.findOne({ _id: lecturer_id });
         if (!lecturer) {
-            return response.status(404).json({ message: "Lecturer Not Found"});
+            return response.status(404).json({ status: 404, message: "Lecturer Not Found"});
         }
 
         const check_owner = await ContentLibrary.findOne({ _id, lecturer_id });
         if (!check_owner) {
-            return response.status(404).json({ message: "Content does not belong to this lecturer"});
+            return response.status(404).json({ status: 404, message: "Content does not belong to this lecturer"});
         }
 
         let thumbnail = null;
@@ -715,7 +715,7 @@ async function updateContent(request, response) {
                 });
             } catch (error) {
                 console.error("Error uploading thumbnail:", error);
-                return response.status(400).json({ error: 'Error uploading thumbnail', message: `${error}` });
+                return response.status(400).json({ error: 'Error uploading thumbnail', status: 400, message: `${error}` });
             }
         }
 
@@ -740,11 +740,11 @@ async function updateContent(request, response) {
             updateObject, // Update object with conditional fields
             { new: true } // To return the updated document
         );
-        return response.status(200).json({ message: 'Content updated successfully', content: updatedContent });
+        return response.status(200).json({ status: 200, message: 'Content updated successfully', data: updatedContent });
 
     } catch (error) {
         console.log(error);
-        return response.status(500).json({ message: 'Internal Server Error' });
+        return response.status(500).json({ status: 500, message: 'Internal Server Error' });
     }
 }
 
@@ -755,27 +755,27 @@ async function deleteContent(request, response) {
     try {
         const lecturer = await Lecturer.findOne({ _id: lecturer_id });
         if (!lecturer) {
-            return response.status(404).json({ message: "Lecturer Not Found"});
+            return response.status(404).json({ status: 404, message: "Lecturer Not Found"});
         }
 
         const check_owner = await ContentLibrary.findOne({ _id, lecturer_id });
         if (!check_owner) {
-            return response.status(404).json({ message: "Content does not belong to this lecturer"});
+            return response.status(404).json({ status: 404, message: "Content does not belong to this lecturer"});
         }
 
         // Perform the update operation
         const deletedContent = await ContentLibrary.findOneAndDelete({ _id, lecturer_id });
 
         if (!deletedContent) {
-            return response.status(404).json({ message: 'Content not found' });
+            return response.status(404).json({ status: 404, message: 'Content not found' });
         }
 
         console.log("Content deleted successfully:", deletedContent);
-        return response.status(204).json({ message: 'Content deleted successfully', content: deletedContent });
+        return response.status(200).json({ status: 200, message: 'Content deleted successfully', data: deletedContent });
 
     } catch (error) {
         console.log(error);
-        return response.status(500).json({ message: 'Internal Server Error' });
+        return response.status(500).json({ status: 500, message: 'Internal Server Error' });
     }
 }
 module.exports = {
