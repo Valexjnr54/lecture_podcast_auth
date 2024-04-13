@@ -80,7 +80,7 @@ const loginStudent = async (request, response, next) => {
     }
     if (!Config.Jwt_secret) {
       console.error("Jwt_secret is not defined!");
-      res.status(500).json({ message: "Internal Server Error" });
+      res.status(500).json({ status: 500, data:{}, message: "Internal Server Error" });
       return;
     }
     // Generate a JWT token for the logged-in student
@@ -119,7 +119,7 @@ const logoutStudent = async (request, response, next) => {
   } catch (error) {
     // Handle any potential errors that may occur during the logout process.
     console.error("Error during logout:", error);
-    response.status(500).json({ message: "Internal Server Error" });
+    response.status(500).json({ status: 500, data:{}, message: "Internal Server Error" });
   }
 };
 
@@ -147,7 +147,7 @@ const verifyEmail = async (request, response, next) => {
     if (student.isVerified) {
       return response
         .status(400)
-        .json({ message: "Email is already verified." });
+        .json({ status: 400, message: "Email is already verified." });
     }
 
     // Check if the verification token has expired
@@ -161,7 +161,7 @@ const verifyEmail = async (request, response, next) => {
     student.isVerified = true;
     await student.save();
 
-    response.status(200).json({ message: "Email verified successfully" });
+    response.status(200).json({ status: 400, message: "Email verified successfully" });
   } catch (error) {
     console.error("Error verifying email:", error);
     next(error);
@@ -181,7 +181,7 @@ const resendVerificationEmail = async (request, response, next) => {
     if (user.isVerified) {
       return response
         .status(400)
-        .json({ message: "Email is already verified." });
+        .json({ status: 400, message: "Email is already verified." });
     }
 
     // Generate a new verification token
@@ -198,7 +198,7 @@ const resendVerificationEmail = async (request, response, next) => {
 
     response.status(200).json({
       success: true,
-      message: "Verification email resent successfully.",
+      status: 200, message: "Verification email resent successfully.", data:user
     });
   } catch (error) {
     console.error("Error resending verification email:", error);

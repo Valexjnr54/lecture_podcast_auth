@@ -31,7 +31,7 @@ async function initializePayment(fullname, phone_number, amount, email, type, ca
         console.error(error);
         return {
             status: 500,
-            data: { message: 'Internal Server Error' }
+            data: { status: 500, message: 'Internal Server Error' }
         };
     }
 }
@@ -64,7 +64,7 @@ async function initializeCompletePayment(facility_name, facility_id, phone_numbe
         console.error(error);
         return {
             status: 500,
-            data: { message: 'Internal Server Error' }
+            data: { status: 500, message: 'Internal Server Error' }
         };
     }
 }
@@ -96,7 +96,7 @@ async function initializeFacilityPayment(facility_name, phone_number, amount, em
         console.error(error);
         return {
             status: 500,
-            data: { message: 'Internal Server Error' }
+            data: { status: 500, message: 'Internal Server Error' }
         };
     }
 }
@@ -116,7 +116,7 @@ async function verifyPayment(reference) {
         console.error(error);
         return {
             status: 500,
-            data: { message: 'Internal Server Error' }
+            data: { status: 500, message: 'Internal Server Error' }
         };
     }
 }

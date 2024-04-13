@@ -12,16 +12,16 @@ const allContent = async (req = Request, res = Response) => {
     const allContents = await ContentLibrary.find();
     if (!allContents) {
       return res.status(404).json({
-        message: "No content found",
+        status: 404, message: "No content found",
       });
     }
     return res.status(200).json({
-      message: "All contents",
-      allContents,
+      status: 200, message: "All contents",
+      data:allContents,
     });
   } catch (error) {
     return res.status(500).json({
-      message: "Internal server error",
+      status: 500, message: "Internal server error",
       error,
     });
   }
@@ -37,16 +37,16 @@ const singleContent = async (req = Request, res = Response) => {
     const singleContent = await ContentLibrary.findById(id);
     if (!singleContent) {
       return res.status(404).json({
-        message: "Content not found",
+        status: 404, message: "Content not found",
       });
     }
     return res.status(200).json({
-      message: "Single content",
-      singleContent,
+      status: 200, message: "Single content",
+      data:singleContent,
     });
   } catch (error) {
     return res.status(500).json({
-      message: "Internal server error",
+      status: 500, message: "Internal server error",
       error,
     });
   }
