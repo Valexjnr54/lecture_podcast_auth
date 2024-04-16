@@ -1,6 +1,8 @@
 const jwt = require("jsonwebtoken");
 const createError = require("http-errors");
 const Student = require("../../models/StudentModel");
+const Lecturer = require("../../models/LecturerModel");
+
 const {
   studentAuthSchema,
   loginSchema,
@@ -26,6 +28,14 @@ const generateVerificationTokenExpiry = () => {
 const registerStudent = async (request, response, next) => {
   try {
     const result = await studentAuthSchema.validateAsync(request.body);
+
+    const lecturer = await Lecturer.findOne({ email: result.email });
+    if (lecturer) {
+      throw createError.Conflict(
+        `You cannot register as a student using a lecturer's email.`
+      );
+    }
+
     const doesExist = await Student.findOne({ email: result.email });
     if (doesExist) throw createError.Conflict(`${result.email} already exist`);
 
@@ -65,6 +75,14 @@ const loginStudent = async (request, response, next) => {
   try {
     const result = await loginSchema.validateAsync(request.body);
     const student = await Student.findOne({ email: result.email });
+
+    const lecturer = await Lecturer.findOne({ email: result.email });
+    if (lecturer) {
+      throw createError.Unauthorized(
+        `Unauthorized. We found out that you are a lecturer. Please login to the web as a lecturer.`
+      );
+    }
+
     if (!student) throw createError.Unauthorized(`Unauthorized Student`);
 
     // Check if the email is verified
@@ -80,7 +98,9 @@ const loginStudent = async (request, response, next) => {
     }
     if (!Config.Jwt_secret) {
       console.error("Jwt_secret is not defined!");
-      res.status(500).json({ status: 500, data:{}, message: "Internal Server Error" });
+      res
+        .status(500)
+        .json({ status: 500, data: {}, message: "Internal Server Error" });
       return;
     }
     // Generate a JWT token for the logged-in student
@@ -119,7 +139,9 @@ const logoutStudent = async (request, response, next) => {
   } catch (error) {
     // Handle any potential errors that may occur during the logout process.
     console.error("Error during logout:", error);
-    response.status(500).json({ status: 500, data:{}, message: "Internal Server Error" });
+    response
+      .status(500)
+      .json({ status: 500, data: {}, message: "Internal Server Error" });
   }
 };
 
@@ -128,7 +150,11 @@ const profileStudent = async (request, response, next) => {
     const userId = request.user.studentId;
     const student = await Student.findOne({ _id: userId });
     if (!student) throw createError.NotFound(`Student Not Found`);
-    response.status(200).json({ status: 200, message:"Student Profile Fetched Successfully", data: student });
+    response.status(200).json({
+      status: 200,
+      message: "Student Profile Fetched Successfully",
+      data: student,
+    });
   } catch (error) {
     console.log(error);
   }
@@ -161,7 +187,9 @@ const verifyEmail = async (request, response, next) => {
     student.isVerified = true;
     await student.save();
 
-    response.status(200).json({ status: 400, message: "Email verified successfully" });
+    response
+      .status(200)
+      .json({ status: 400, message: "Email verified successfully" });
   } catch (error) {
     console.error("Error verifying email:", error);
     next(error);
@@ -198,7 +226,9 @@ const resendVerificationEmail = async (request, response, next) => {
 
     response.status(200).json({
       success: true,
-      status: 200, message: "Verification email resent successfully.", data:user
+      status: 200,
+      message: "Verification email resent successfully.",
+      data: user,
     });
   } catch (error) {
     console.error("Error resending verification email:", error);
