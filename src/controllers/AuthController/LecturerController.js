@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const createError = require("http-errors");
+const Student = require("../../models/StudentModel");
 const Lecturer = require("../../models/LecturerModel");
 const { authSchema, loginSchema } = require("../../helpers/validation_schema");
 const {
@@ -23,6 +24,14 @@ const generateVerificationTokenExpiry = () => {
 const registerLecturer = async (request, response, next) => {
   try {
     const result = await authSchema.validateAsync(request.body);
+
+    const student = await Student.findOne({ email: result.email });
+    if (student) {
+      throw createError.Conflict(
+        `You cannot register as a lecturer using a student's email.`
+      );
+    }
+
     const doesExist = await Lecturer.findOne({ email: result.email });
     if (doesExist) throw createError.Conflict(`${result.email} already exist`);
 
@@ -61,6 +70,14 @@ const loginLecturer = async (request, response, next) => {
   try {
     const result = await loginSchema.validateAsync(request.body);
     const lecturer = await Lecturer.findOne({ email: result.email });
+
+    const student = await Student.findOne({ email: result.email });
+    if (student) {
+      throw createError.Unauthorized(
+        `Unauthorized. We found that you are a student. Please login to the app as a student.`
+      );
+    }
+
     if (!lecturer) throw createError.Unauthorized(`Unauthorized lecturer`);
 
     // Check if the email is verified
@@ -76,7 +93,9 @@ const loginLecturer = async (request, response, next) => {
     }
     if (!Config.Jwt_secret) {
       console.error("Jwt_secret is not defined!");
-      res.status(500).json({ status: 500, data:{}, message: "Internal Server Error" });
+      res
+        .status(500)
+        .json({ status: 500, data: {}, message: "Internal Server Error" });
       return;
     }
     // Generate a JWT token for the logged-in lecturer
@@ -117,7 +136,9 @@ const logoutLecturer = async (request, response, next) => {
   } catch (error) {
     // Handle any potential errors that may occur during the logout process.
     console.error("Error during logout:", error);
-    response.status(500).json({ status: 500, data:{}, message: "Internal Server Error" });
+    response
+      .status(500)
+      .json({ status: 500, data: {}, message: "Internal Server Error" });
   }
 };
 
@@ -126,7 +147,11 @@ const profileLecturer = async (request, response, next) => {
     const userId = request.user.lecturerId;
     const lecturer = await Lecturer.findOne({ _id: userId });
     if (!lecturer) throw createError.NotFound(`Lecturer Not Found`);
-    response.status(200).json({ status: 200, message:"Lecturer Profile Fetched Successfully", data: lecturer });
+    response.status(200).json({
+      status: 200,
+      message: "Lecturer Profile Fetched Successfully",
+      data: lecturer,
+    });
   } catch (error) {
     console.log(error);
   }
@@ -135,7 +160,11 @@ const profileLecturer = async (request, response, next) => {
 const getAllLecturers = async (request, response, next) => {
   try {
     const lecturers = await Lecturer.find();
-    response.status(200).json({ status: 200, message:"Lecturers Fetched Successfully", data:lecturers });
+    response.status(200).json({
+      status: 200,
+      message: "Lecturers Fetched Successfully",
+      data: lecturers,
+    });
   } catch (error) {
     next(error);
   }
@@ -168,7 +197,11 @@ const verifyEmail = async (request, response, next) => {
     lecturer.isVerified = true;
     await lecturer.save();
 
-    response.status(200).json({ status: 200, message: "Email verified successfully", data:lecturer });
+    response.status(200).json({
+      status: 200,
+      message: "Email verified successfully",
+      data: lecturer,
+    });
   } catch (error) {
     console.error("Error verifying email:", error);
     next(error);
@@ -205,7 +238,9 @@ const resendVerificationEmail = async (request, response, next) => {
 
     response.status(200).json({
       success: true,
-      status: 200, message: "Verification email resent successfully.", data:user
+      status: 200,
+      message: "Verification email resent successfully.",
+      data: user,
     });
   } catch (error) {
     next(error);
