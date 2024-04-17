@@ -20,7 +20,9 @@ async function changePassword(request, response) {
   const { old_password, new_password } = request.body;
   const student_id = request.user.studentId;
   if (!student_id) {
-    return response.status(403).json({ status: 403, message: "Unauthorized User" });
+    return response
+      .status(403)
+      .json({ status: 403, message: "Unauthorized User" });
   }
   try {
     const validationRules = [
@@ -40,7 +42,9 @@ async function changePassword(request, response) {
 
     const student = await Student.findOne({ _id: student_id });
     if (!student) {
-      return response.status(404).json({ status: 404, message: "Student Not Found" });
+      return response
+        .status(404)
+        .json({ status: 404, message: "Student Not Found" });
     }
     const password = student.password;
 
@@ -63,10 +67,16 @@ async function changePassword(request, response) {
 
     return response
       .status(200)
-      .json({ status: 200, message: "Password Updated Successfully", data: update });
+      .json({
+        status: 200,
+        message: "Password Updated Successfully",
+        data: update,
+      });
   } catch (error) {
     console.log(error);
-    return response.status(500).json({ status: 500, message: "Internal Server Error" });
+    return response
+      .status(500)
+      .json({ status: 500, message: "Internal Server Error" });
   }
 }
 
@@ -75,13 +85,17 @@ async function changeProfileImage(request, response) {
 
   // Check if user_id is not present or undefined
   if (!student_id) {
-    return response.status(403).json({ status: 403, message: "Unauthorized User" });
+    return response
+      .status(403)
+      .json({ status: 403, message: "Unauthorized User" });
   }
   try {
     // Retrieve the user by user_id
     const student = await Student.findById({ _id: student_id });
     if (!student) {
-      return response.status(404).json({ status: 404, message: "Student Not Found" });
+      return response
+        .status(404)
+        .json({ status: 404, message: "Student Not Found" });
     }
 
     // Uploading Image to Cloudinary
@@ -106,7 +120,9 @@ async function changeProfileImage(request, response) {
         }
       });
     } else {
-      return response.status(400).json({ status: 400, message: "No file uploaded" });
+      return response
+        .status(400)
+        .json({ status: 400, message: "No file uploaded" });
     }
 
     const student_updated = await Student.findOneAndUpdate(
@@ -115,7 +131,8 @@ async function changeProfileImage(request, response) {
       { new: true }
     );
     return response.status(200).json({
-      status: 200, message: "Student profile image updated",
+      status: 200,
+      message: "Student profile image updated",
       data: student_updated,
     });
   } catch (error) {
@@ -129,7 +146,9 @@ async function updateDetails(request, response) {
 
   // Check if user_id is not present or undefined
   if (!student_id) {
-    return response.status(403).json({ status: 403, message: "Unauthorized User" });
+    return response
+      .status(403)
+      .json({ status: 403, message: "Unauthorized User" });
   }
   try {
     const validationRules = [
@@ -148,7 +167,9 @@ async function updateDetails(request, response) {
     // Retrieve the user by user_id
     const student = await Student.findById({ _id: student_id });
     if (!student) {
-      return response.status(404).json({ status: 404, message: "Student Not Found" });
+      return response
+        .status(404)
+        .json({ status: 404, message: "Student Not Found" });
     }
 
     const user = await Student.findOneAndUpdate(
@@ -171,7 +192,11 @@ const forgotPassword = async (req, res, next) => {
     const user = await Student.findOne({ email });
 
     if (!user) {
-      return next(createError(404, `User with email ${email} does not exist`));
+      // return next(createError(404, `User with email ${email} does not exist`));
+      return res.status(404).json({
+        status: 404,
+        message: `User with email ${email} does not exist`,
+      });
     }
 
     const resetToken = jwt.sign({ email: user.email }, Config.Jwt_secret, {
@@ -182,10 +207,16 @@ const forgotPassword = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      status: 200, message: "Reset token generated and sent to your email.", data:user
+      status: 200,
+      message: "Reset token generated and sent to your email.",
+      data: user,
     });
   } catch (error) {
-    next(error);
+    return res
+      .status(500)
+      .json({ status: 500, message: "Internal Server Error", data: { error } });
+
+    // next(error);
   }
 };
 
@@ -199,7 +230,8 @@ const resetPassword = async (req, res, next) => {
     console.log(user);
 
     if (!user) {
-      return next(createError(404, "User not found"));
+      // return next(createError(404, "User not found"));
+      return res.status(404).json({ status: 404, message: "User not found" });
     }
 
     user.password = password;
@@ -207,9 +239,18 @@ const resetPassword = async (req, res, next) => {
 
     res
       .status(200)
-      .json({ success: true, status: 200, message: "Password reset successful", data:user });
+      .json({
+        success: true,
+        status: 200,
+        message: "Password reset successful",
+        data: user,
+      });
   } catch (error) {
-    next(error);
+    console.error("Error resetting password:", error);
+    return res
+      .status(500)
+      .json({ status: 500, message: "Internal Server Error", data: { error } });
+    // next(error);
   }
 };
 

@@ -27,13 +27,23 @@ const registerLecturer = async (request, response, next) => {
 
     const student = await Student.findOne({ email: result.email });
     if (student) {
-      throw createError.Conflict(
-        `You cannot register as a lecturer using a student's email.`
-      );
+      // throw createError.Conflict(
+      //   `You cannot register as a lecturer using a student's email.`
+      // );
+      return response.status(400).json({
+        status: 400,
+        message: `You cannot register as a lecturer using a student's email.`,
+      });
     }
 
     const doesExist = await Lecturer.findOne({ email: result.email });
-    if (doesExist) throw createError.Conflict(`${result.email} already exist`);
+    // if (doesExist) throw createError.Conflict(`${result.email} already exist`);
+    if (doesExist) {
+      return response.status(400).json({
+        status: 400,
+        message: `${result.email} already exist`,
+      });
+    }
 
     const verificationToken = jwt.sign(
       { email: result.email },
@@ -73,23 +83,41 @@ const loginLecturer = async (request, response, next) => {
 
     const student = await Student.findOne({ email: result.email });
     if (student) {
-      throw createError.Unauthorized(
-        `Unauthorized. We found that you are a student. Please login to the app as a student.`
-      );
+      // throw createError.Unauthorized(
+      //   `Unauthorized. We found that you are a student. Please login to the app as a student.`
+      // );
+      return response.status(400).json({
+        status: 400,
+        message: `Unauthorized. We found that you are a student. Please login to the app as a student.`,
+      });
     }
 
-    if (!lecturer) throw createError.Unauthorized(`Unauthorized lecturer`);
+    // if (!lecturer) throw createError.Unauthorized(`Unauthorized lecturer`);
+    if (!lecturer) {
+      return response.status(400).json({
+        status: 400,
+        message: `Unauthorized lecturer`,
+      });
+    }
 
     // Check if the email is verified
     if (!lecturer.isVerified) {
-      throw createError.Unauthorized(
-        `Email not verified. Please check your inbox for the verification email.`
-      );
+      // throw createError.Unauthorized(
+      //   `Email not verified. Please check your inbox for the verification email.`
+      // );
+      return response.status(400).json({
+        status: 400,
+        message: `Email not verified. Please check your inbox for the verification email.`,
+      });
     }
 
     const isMatch = await lecturer.isValidPassword(result.password);
     if (!isMatch) {
-      throw createError.Unauthorized("Invalid Email/Password");
+      // throw createError.Unauthorized("Invalid Email/Password");
+      return response.status(400).json({
+        status: 400,
+        message: "Invalid Email/Password",
+      });
     }
     if (!Config.Jwt_secret) {
       console.error("Jwt_secret is not defined!");
@@ -115,15 +143,24 @@ const loginLecturer = async (request, response, next) => {
       .json({ data: lecturer, token, status: 201, success: true });
   } catch (error) {
     if (error.isJoi === true)
-      return next(createError.BadRequest("Invalid Email/Password"));
-    next(error);
+      // return next(createError.BadRequest("Invalid Email/Password"));
+      return response.status(400).json({
+        status: 400,
+        message: `Invalid Email/Password`,
+      });
+    // next(error);
   }
 };
 
 const logoutLecturer = async (request, response, next) => {
   try {
     if (!request.headers["authorization"])
-      next(createError.Unauthorized("Unauthorized Lecturer"));
+      // next(createError.Unauthorized("Unauthorized Lecturer"));
+      return response.status(400).json({
+        status: 400,
+        message: `Unauthorized Lecturer`,
+      });
+
     const authHeader = request.headers["authorization"];
     const bearerToken = authHeader.split(" ");
     const token = bearerToken[1];
@@ -146,7 +183,13 @@ const profileLecturer = async (request, response, next) => {
   try {
     const userId = request.user.lecturerId;
     const lecturer = await Lecturer.findOne({ _id: userId });
-    if (!lecturer) throw createError.NotFound(`Lecturer Not Found`);
+    // if (!lecturer) throw createError.NotFound(`Lecturer Not Found`);
+    if (!lecturer) {
+      return response.status(404).json({
+        status: 404,
+        message: `Lecturer Not Found`,
+      });
+    }
     response.status(200).json({
       status: 200,
       message: "Lecturer Profile Fetched Successfully",
@@ -154,6 +197,9 @@ const profileLecturer = async (request, response, next) => {
     });
   } catch (error) {
     console.log(error);
+    response
+      .status(500)
+      .json({ status: 500, data: {}, message: "Internal Server Error" });
   }
 };
 
@@ -166,7 +212,13 @@ const getAllLecturers = async (request, response, next) => {
       data: lecturers,
     });
   } catch (error) {
-    next(error);
+    console.error("Error fetching lecturers:", error);
+    return response.status(500).json({
+      status: 500,
+      message: "Internal server error",
+      data: { error: error.message },
+    });
+    // next(error);
   }
 };
 
@@ -177,7 +229,10 @@ const verifyEmail = async (request, response, next) => {
     const lecturer = await Lecturer.findOne({ email: decoded.email });
 
     if (!lecturer) {
-      throw createError.NotFound("User not found");
+      // throw createError.NotFound("User not found");
+      return response
+        .status(404)
+        .json({ status: 404, message: "User not found" });
     }
 
     if (lecturer.isVerified) {
@@ -190,7 +245,10 @@ const verifyEmail = async (request, response, next) => {
     const currentTime = new Date();
     const tokenExpiration = new Date(decoded.exp * 1000); // Convert seconds to milliseconds
     if (currentTime > tokenExpiration) {
-      throw createError.BadRequest("Verification token has expired");
+      // throw createError.BadRequest("Verification token has expired");
+      return response
+        .status(400)
+        .json({ status: 400, message: "Verification token has expired" });
     }
 
     // Update the user's verification status
@@ -204,7 +262,12 @@ const verifyEmail = async (request, response, next) => {
     });
   } catch (error) {
     console.error("Error verifying email:", error);
-    next(error);
+    return response.status(500).json({
+      status: 500,
+      message: "Internal Server Error",
+      data: { error },
+    });
+    // next(error);
   }
 };
 
@@ -243,7 +306,13 @@ const resendVerificationEmail = async (request, response, next) => {
       data: user,
     });
   } catch (error) {
-    next(error);
+    console.error("Error resending verification email:", error);
+    return response.status(500).json({
+      status: 500,
+      message: "Internal Server Error",
+      data: { error },
+    });
+    // next(error);
   }
 };
 
