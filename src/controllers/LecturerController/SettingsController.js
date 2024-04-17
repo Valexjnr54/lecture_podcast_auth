@@ -17,7 +17,9 @@ async function changePassword(request, response) {
   const { old_password, new_password } = request.body;
   const lecturer_id = request.user.lecturerId;
   if (!lecturer_id) {
-    return response.status(403).json({ status: 403, message: "Unauthorized User" });
+    return response
+      .status(403)
+      .json({ status: 403, message: "Unauthorized User" });
   }
   try {
     const validationRules = [
@@ -37,7 +39,9 @@ async function changePassword(request, response) {
 
     const lecturer = await Lecturer.findOne({ _id: lecturer_id });
     if (!lecturer) {
-      return response.status(404).json({ status: 404, message: "Lecturer Not Found" });
+      return response
+        .status(404)
+        .json({ status: 404, message: "Lecturer Not Found" });
     }
     const password = lecturer.password;
 
@@ -60,10 +64,16 @@ async function changePassword(request, response) {
 
     return response
       .status(200)
-      .json({ status: 200, message: "Password Updated Successfully", data: update });
+      .json({
+        status: 200,
+        message: "Password Updated Successfully",
+        data: update,
+      });
   } catch (error) {
     console.log(error);
-    return response.status(500).json({ status: 500, message: "Internal Server Error" });
+    return response
+      .status(500)
+      .json({ status: 500, message: "Internal Server Error" });
   }
 }
 
@@ -72,13 +82,17 @@ async function changeProfileImage(request, response) {
 
   // Check if user_id is not present or undefined
   if (!lecturer_id) {
-    return response.status(403).json({ status: 403, message: "Unauthorized User" });
+    return response
+      .status(403)
+      .json({ status: 403, message: "Unauthorized User" });
   }
   try {
     // Retrieve the user by user_id
     const lecturer = await Lecturer.findById({ _id: lecturer_id });
     if (!lecturer) {
-      return response.status(404).json({ status: 404, message: "Lecturer Not Found" });
+      return response
+        .status(404)
+        .json({ status: 404, message: "Lecturer Not Found" });
     }
 
     // Uploading Image to Cloudinary
@@ -103,7 +117,9 @@ async function changeProfileImage(request, response) {
         }
       });
     } else {
-      return response.status(400).json({ status: 400, message: "No file uploaded" });
+      return response
+        .status(400)
+        .json({ status: 400, message: "No file uploaded" });
     }
 
     const lecturer_updated = await Lecturer.findOneAndUpdate(
@@ -112,7 +128,8 @@ async function changeProfileImage(request, response) {
       { new: true }
     );
     return response.status(200).json({
-      status: 200, message: "Lecturer profile image updated",
+      status: 200,
+      message: "Lecturer profile image updated",
       data: lecturer_updated,
     });
   } catch (error) {
@@ -126,7 +143,9 @@ async function updateDetails(request, response) {
 
   // Check if user_id is not present or undefined
   if (!lecturer_id) {
-    return response.status(403).json({ status: 403, message: "Unauthorized User" });
+    return response
+      .status(403)
+      .json({ status: 403, message: "Unauthorized User" });
   }
   try {
     const validationRules = [
@@ -145,7 +164,9 @@ async function updateDetails(request, response) {
     // Retrieve the user by user_id
     const lecturer = await Lecturer.findById({ _id: lecturer_id });
     if (!lecturer) {
-      return response.status(404).json({ status: 404, message: "Lecturer Not Found" });
+      return response
+        .status(404)
+        .json({ status: 404, message: "Lecturer Not Found" });
     }
 
     const user = await Lecturer.findOneAndUpdate(
@@ -168,7 +189,11 @@ const forgotPassword = async (req, res, next) => {
     const user = await Lecturer.findOne({ email });
 
     if (!user) {
-      return next(createError(404, `User with email ${email} does not exist`));
+      // return next(createError(404, `User with email ${email} does not exist`));
+      return res.status(404).json({
+        status: 404,
+        message: `User with email ${email} does not exist`,
+      });
     }
 
     const resetToken = jwt.sign({ email: user.email }, Config.Jwt_secret, {
@@ -179,10 +204,16 @@ const forgotPassword = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      status: 200, message: "Reset token generated and sent to your email.", data:user
+      status: 200,
+      message: "Reset token generated and sent to your email.",
+      data: user,
     });
   } catch (error) {
-    next(error);
+    res
+      .status(500)
+      .json({ status: 500, message: "Internal Server Error", data: { error } });
+
+    // next(error);
   }
 };
 
@@ -196,7 +227,8 @@ const resetPassword = async (req, res, next) => {
     console.log(user);
 
     if (!user) {
-      return next(createError(404, "User not found"));
+      // return next(createError(404, "User not found"));
+      return res.status(404).json({ status: 404, message: "User not found" });
     }
 
     user.password = password;
@@ -204,9 +236,16 @@ const resetPassword = async (req, res, next) => {
 
     res
       .status(200)
-      .json({ success: true, status: 200, message: "Password reset successful" });
+      .json({
+        success: true,
+        status: 200,
+        message: "Password reset successful",
+      });
   } catch (error) {
-    next(error);
+    res
+      .status(500)
+      .json({ status: 500, message: "Internal Server Error", data: { error } });
+    // next(error);
   }
 };
 
