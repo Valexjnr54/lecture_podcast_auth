@@ -216,6 +216,7 @@ async function createAudioContent(request, response) {
     // Create a new instance of the ContentModel
     const content = new ContentLibrary({
       lecturer_id,
+      lecturer_name: lecturer.fullname,
       course_title,
       course_code, // This can be null if not provided in the request
       content_url,
@@ -323,6 +324,7 @@ async function createFileContent(request, response) {
     // Create a new instance of the ContentModel
     const content = new ContentLibrary({
       lecturer_id,
+      lecturer_name: lecturer.fullname,
       course_title,
       course_code, // This can be null if not provided in the request
       content_url,
@@ -404,6 +406,7 @@ async function createContent(request, response) {
     // Create a new instance of the ContentModel
     const content = new ContentLibrary({
       lecturer_id,
+      lecturer_name: lecturer.fullname,
       course_title,
       course_code, // This can be null if not provided in the request
       content_url,
