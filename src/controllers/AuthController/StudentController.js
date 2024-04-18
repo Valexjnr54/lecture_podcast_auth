@@ -196,7 +196,18 @@ const profileStudent = async (request, response, next) => {
 const verifyEmail = async (request, response, next) => {
   try {
     const { token } = request.query;
-    const decoded = jwt.verify(token, Config.Jwt_secret);
+    // Verify the token
+    let decoded;
+    try {
+      decoded = jwt.verify(token, Config.Jwt_secret);
+    } catch (error) {
+      if (error.name === "TokenExpiredError") {
+        return response
+          .status(400)
+          .json({ status: 400, message: "Verification token has expired" });
+      }
+      throw error; // Re-throw other errors
+    }
     const student = await Student.findOne({ email: decoded.email });
 
     if (!student) {
