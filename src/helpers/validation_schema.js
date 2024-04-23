@@ -10,7 +10,14 @@ const authSchema = Joi.object({
   password: Joi.string()
     .min(8)
     .required()
-    .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")),
+    .pattern(
+      new RegExp(
+        "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$"
+      )
+    )
+    .message(
+      "Password must contain at least one alphabetical character, one digit, one special symbol, and be at least 8 characters long"
+    ),
   confirm_password: Joi.ref("password"),
 });
 
