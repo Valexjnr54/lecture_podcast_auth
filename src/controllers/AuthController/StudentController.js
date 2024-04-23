@@ -14,6 +14,7 @@ const {
 } = require("../../helpers/jwt_helper");
 const { Config } = require("../../config/config");
 const { sendVerificationEmail } = require("../../utils/emailSender");
+const { error } = require("@hapi/joi/lib/base");
 
 const generateVerificationToken = (email) => {
   return jwt.sign({ email: email }, Config.Jwt_secret, {
@@ -37,6 +38,10 @@ const registerStudent = async (request, response, next) => {
       return response.status(400).json({
         status: 400,
         message: `You cannot register as a student using a lecturer's email.`,
+        error: {
+          status: 400,
+          message: `You cannot register as a student using a lecturer's email.`,
+        },
       });
     }
 
@@ -46,6 +51,10 @@ const registerStudent = async (request, response, next) => {
       return response.status(400).json({
         status: 400,
         message: `${result.email} already exist`,
+        error: {
+          status: 400,
+          message: `${result.email} already exist`,
+        },
       });
     }
 
@@ -74,9 +83,12 @@ const registerStudent = async (request, response, next) => {
       .json({ data: savedStudent, success: true, status: 201 });
   } catch (error) {
     if (error.isJoi === true) error.status = 422;
-    response
-      .status(error.status || 500)
-      .json({ message: error.message, success: false, status: error.status });
+    response.status(error.status || 500).json({
+      message: error.message,
+      success: false,
+      status: error.status,
+      error,
+    });
     // next(error);
   }
 };
@@ -94,10 +106,24 @@ const loginStudent = async (request, response, next) => {
       return response.status(400).json({
         status: 400,
         message: `Unauthorized. We found out that you are a lecturer. Please login to the web as a lecturer.`,
+        error: {
+          status: 400,
+          message: `Unauthorized. We found out that you are a lecturer. Please login to the web as a lecturer.`,
+        },
       });
     }
 
-    if (!student) throw createError.Unauthorized(`Unauthorized Student`);
+    // if (!student) throw createError.Unauthorized(`Unauthorized Student`);
+    if (!student) {
+      return response.status(400).json({
+        status: 400,
+        message: `Unauthorized Student`,
+        error: {
+          status: 400,
+          message: `Unauthorized Student`,
+        },
+      });
+    }
 
     // Check if the email is verified
     if (!student.isVerified) {
@@ -107,6 +133,10 @@ const loginStudent = async (request, response, next) => {
       return response.status(400).json({
         status: 400,
         message: `Email not verified. Please check your inbox for the verification email.`,
+        error: {
+          status: 400,
+          message: `Email not verified. Please check your inbox for the verification email.`,
+        },
       });
     }
 
@@ -116,6 +146,10 @@ const loginStudent = async (request, response, next) => {
       return response.status(400).json({
         status: 400,
         message: `Invalid Email/Password`,
+        error: {
+          status: 400,
+          message: `Invalid Email/Password`,
+        },
       });
     }
     if (!Config.Jwt_secret) {
@@ -144,6 +178,10 @@ const loginStudent = async (request, response, next) => {
       return response.status(400).json({
         status: 400,
         message: `Invalid Email/Password`,
+        error: {
+          status: 400,
+          message: `Invalid Email/Password`,
+        },
       });
     // next(error);
   }
@@ -156,6 +194,10 @@ const logoutStudent = async (request, response, next) => {
       return response.status(400).json({
         status: 400,
         message: `Unauthorized Student`,
+        error: {
+          status: 400,
+          message: `Unauthorized Student`,
+        },
       });
     const authHeader = request.headers["authorization"];
     const bearerToken = authHeader.split(" ");
@@ -171,7 +213,7 @@ const logoutStudent = async (request, response, next) => {
     console.error("Error during logout:", error);
     response
       .status(500)
-      .json({ status: 500, data: {}, message: "Internal Server Error" });
+      .json({ status: 500, data: {}, message: "Internal Server Error", error });
   }
 };
 
@@ -179,7 +221,17 @@ const profileStudent = async (request, response, next) => {
   try {
     const userId = request.user.studentId;
     const student = await Student.findOne({ _id: userId });
-    if (!student) throw createError.NotFound(`Student Not Found`);
+    // if (!student) throw createError.NotFound(`Student Not Found`);
+    if (!student) {
+      return response.status(404).json({
+        status: 404,
+        message: `Student Not Found`,
+        error: {
+          status: 404,
+          message: `Student Not Found`,
+        },
+      });
+    }
     response.status(200).json({
       status: 200,
       message: "Student Profile Fetched Successfully",
@@ -189,7 +241,7 @@ const profileStudent = async (request, response, next) => {
     console.log(error);
     response
       .status(500)
-      .json({ status: 500, data: {}, message: "Internal Server Error" });
+      .json({ status: 500, data: {}, message: "Internal Server Error", error });
   }
 };
 
@@ -202,9 +254,11 @@ const verifyEmail = async (request, response, next) => {
       decoded = jwt.verify(token, Config.Jwt_secret);
     } catch (error) {
       if (error.name === "TokenExpiredError") {
-        return response
-          .status(400)
-          .json({ status: 400, message: "Verification token has expired" });
+        return response.status(400).json({
+          status: 400,
+          message: "Verification token has expired",
+          error,
+        });
       }
       throw error; // Re-throw other errors
     }
@@ -212,15 +266,25 @@ const verifyEmail = async (request, response, next) => {
 
     if (!student) {
       // throw createError.NotFound("User not found");
-      return response
-        .status(404)
-        .json({ status: 404, message: "User not found" });
+      return response.status(404).json({
+        status: 404,
+        message: "User not found",
+        error: {
+          status: 404,
+          message: "User not found",
+        },
+      });
     }
 
     if (student.isVerified) {
-      return response
-        .status(400)
-        .json({ status: 400, message: "Email is already verified." });
+      return response.status(400).json({
+        status: 400,
+        message: "Email is already verified.",
+        error: {
+          status: 400,
+          message: "Email is already verified.",
+        },
+      });
     }
 
     // Check if the verification token has expired
@@ -228,9 +292,14 @@ const verifyEmail = async (request, response, next) => {
     const tokenExpiration = new Date(decoded.exp * 1000); // Convert seconds to milliseconds
     if (currentTime > tokenExpiration) {
       // throw createError.BadRequest("Verification token has expired");
-      return response
-        .status(400)
-        .json({ status: 400, message: "Verification token has expired" });
+      return response.status(400).json({
+        status: 400,
+        message: "Verification token has expired",
+        error: {
+          status: 400,
+          message: "Verification token has expired",
+        },
+      });
     }
 
     // Update the user's verification status
@@ -239,12 +308,12 @@ const verifyEmail = async (request, response, next) => {
 
     response
       .status(200)
-      .json({ status: 400, message: "Email verified successfully" });
+      .json({ status: 200, message: "Email verified successfully" });
   } catch (error) {
     console.error("Error verifying email:", error);
     return response
       .status(500)
-      .json({ status: 500, message: "Internal Server Error", data: { error } });
+      .json({ status: 500, message: "Internal Server Error", error });
 
     // next(error);
   }
@@ -261,13 +330,22 @@ const resendVerificationEmail = async (request, response, next) => {
       return response.status(404).json({
         status: 404,
         message: `User with email ${email} does not exist`,
+        error: {
+          status: 404,
+          message: `User with email ${email} does not exist`,
+        },
       });
     }
 
     if (user.isVerified) {
-      return response
-        .status(400)
-        .json({ status: 400, message: "Email is already verified." });
+      return response.status(400).json({
+        status: 400,
+        message: "Email is already verified.",
+        error: {
+          status: 400,
+          message: "Email is already verified.",
+        },
+      });
     }
 
     // Generate a new verification token
@@ -292,7 +370,7 @@ const resendVerificationEmail = async (request, response, next) => {
     console.error("Error resending verification email:", error);
     return response
       .status(500)
-      .json({ status: 500, message: "Internal Server Error", data: { error } });
+      .json({ status: 500, message: "Internal Server Error", error });
     // next(error);
   }
 };
