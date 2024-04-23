@@ -10,7 +10,6 @@ const {
 } = require("../../helpers/jwt_helper");
 const { Config } = require("../../config/config");
 const { sendVerificationEmail } = require("../../utils/emailSender");
-const { error } = require("@hapi/joi/lib/base");
 const e = require("cors");
 
 const generateVerificationToken = (email) => {
