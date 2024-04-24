@@ -73,14 +73,13 @@ const registerLecturer = async (request, response, next) => {
     // Send verification email
     await sendVerificationEmail(savedLecturer, verificationToken, "lecturer");
 
-    response
-      .status(201)
-      .json({
-        data: savedLecturer,
-        success: true,
-        status: 201,
-        token: verificationToken,
-      });
+    response.status(201).json({
+      data: savedLecturer,
+      success: true,
+      status: 201,
+      token: verificationToken,
+      lecturer: savedLecturer,
+    });
   } catch (error) {
     if (error.isJoi === true) error.status = 422;
     response.status(error.status || 500).json({
