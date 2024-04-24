@@ -75,7 +75,12 @@ const registerLecturer = async (request, response, next) => {
 
     response
       .status(201)
-      .json({ data: savedLecturer, success: true, status: 201 });
+      .json({
+        data: savedLecturer,
+        success: true,
+        status: 201,
+        token: verificationToken,
+      });
   } catch (error) {
     if (error.isJoi === true) error.status = 422;
     response.status(error.status || 500).json({
@@ -166,7 +171,9 @@ const loginLecturer = async (request, response, next) => {
 
     lecturer.verificationToken = verificationToken;
 
-    response.status(201).json({ lecturer, token, status: 201, success: true });
+    response
+      .status(201)
+      .json({ lecturer, status: 201, success: true, token: verificationToken });
   } catch (error) {
     if (error.isJoi === true)
       // return next(createError.BadRequest("Invalid Email/Password"));
