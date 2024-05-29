@@ -10,6 +10,7 @@ const LearnerAuthRouter = require("./routes/Auths/studentAuthRoutes");
 const AdminAuthRouter = require("./routes/Auths/adminAuthRoutes");
 const lecturerContentRouter = require("./routes/Lecturer/contentLibrary");
 const contentRouter = require("./routes/Contents/contents");
+const searchRouter = require("./routes/searchRoutes");
 const settingLecturerRouter = require("./routes/Lecturer/settings");
 const settingStudentRouter = require("./routes/Student/studentSettings");
 const settingAdminRouter = require("./routes/Admin/adminSettings");
@@ -51,6 +52,8 @@ app.use(route + "/lecturer/settings", settingLecturerRouter);
 
 app.use(route + "/student/settings", settingStudentRouter);
 app.use(route + "/admin/settings", settingAdminRouter);
+
+app.use(route + "/search", searchRouter);
 
 app.use(async (req, res, next) => {
   next(createError.NotFound());

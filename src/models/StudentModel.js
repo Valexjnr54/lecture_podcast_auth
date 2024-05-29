@@ -14,6 +14,9 @@ const StudentSchema = new Schema({
     lowercase: true,
     unique: true,
   },
+  address: {
+    type: String,
+  },
   phone_number: {
     type: String,
     required: true,
@@ -25,6 +28,15 @@ const StudentSchema = new Schema({
   password: {
     type: String,
     required: true,
+  },
+  university: {
+    type: String,
+  },
+  course: {
+    type: String,
+  },
+  level: {
+    type: String,
   },
   resetToken: {
     type: String,

@@ -65,13 +65,11 @@ async function changePassword(request, response) {
       { new: true }
     );
 
-    return response
-      .status(200)
-      .json({
-        status: 200,
-        message: "Password Updated Successfully",
-        data: update,
-      });
+    return response.status(200).json({
+      status: 200,
+      message: "Password Updated Successfully",
+      data: update,
+    });
   } catch (error) {
     console.log(error);
     return response
@@ -141,10 +139,9 @@ async function changeProfileImage(request, response) {
 }
 
 async function updateDetails(request, response) {
-  const { fullname, phone_number } = request.body;
+  const { address, phone_number, level, course, university } = request.body;
   const student_id = request.user.studentId;
 
-  // Check if user_id is not present or undefined
   if (!student_id) {
     return response
       .status(403)
@@ -152,11 +149,13 @@ async function updateDetails(request, response) {
   }
   try {
     const validationRules = [
-      body("fullname").notEmpty().withMessage("Full Name is required"),
+      body("address").notEmpty().withMessage("Address is required"),
       body("phone_number").notEmpty().withMessage("Phone number is required"),
+      body("level").notEmpty().withMessage("Level is required"),
+      body("course").notEmpty().withMessage("Course is required"),
+      body("university").notEmpty().withMessage("University is required"),
     ];
 
-    // Apply validation rules to the request
     await Promise.all(validationRules.map((rule) => rule.run(request)));
 
     const errors = validationResult(request);
@@ -164,7 +163,6 @@ async function updateDetails(request, response) {
       return response.status(400).json({ errors: errors.array() });
     }
 
-    // Retrieve the user by user_id
     const student = await Student.findById({ _id: student_id });
     if (!student) {
       return response
@@ -174,7 +172,7 @@ async function updateDetails(request, response) {
 
     const user = await Student.findOneAndUpdate(
       { _id: student_id },
-      { fullname, phone_number },
+      { address, phone_number, level, course, university },
       { new: true }
     );
 
@@ -237,14 +235,12 @@ const resetPassword = async (req, res, next) => {
     user.password = password;
     await user.save();
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        status: 200,
-        message: "Password reset successful",
-        data: user,
-      });
+    res.status(200).json({
+      success: true,
+      status: 200,
+      message: "Password reset successful",
+      data: user,
+    });
   } catch (error) {
     console.error("Error resetting password:", error);
     return res
