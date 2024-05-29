@@ -39,6 +39,7 @@ const adminAuthSchema = Joi.object({
 
 const studentAuthSchema = Joi.object({
   fullname: Joi.string().required(),
+  address: Joi.string().required(),
   email: Joi.string().email().lowercase().required(),
   phone_number: Joi.string().required(),
   password: Joi.string()
@@ -52,6 +53,9 @@ const studentAuthSchema = Joi.object({
       "Password must contain at least one alphabetical character, one digit, one special symbol, and be at least 8 characters long"
     ),
   confirm_password: Joi.ref("password"),
+  university: Joi.string().required(),
+  course: Joi.string().required(),
+  level: Joi.string().required(),
 });
 
 const loginSchema = Joi.object({
