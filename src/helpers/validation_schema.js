@@ -39,7 +39,6 @@ const adminAuthSchema = Joi.object({
 
 const studentAuthSchema = Joi.object({
   fullname: Joi.string().required(),
-  address: Joi.string().required(),
   email: Joi.string().email().lowercase().required(),
   phone_number: Joi.string().required(),
   password: Joi.string()
