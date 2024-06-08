@@ -53,9 +53,6 @@ const studentAuthSchema = Joi.object({
       "Password must contain at least one alphabetical character, one digit, one special symbol, and be at least 8 characters long"
     ),
   confirm_password: Joi.ref("password"),
-  university: Joi.string().required(),
-  course: Joi.string().required(),
-  level: Joi.string().required(),
 });
 
 const loginSchema = Joi.object({
