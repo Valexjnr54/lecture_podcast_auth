@@ -3,3 +3,5 @@ node_modules
 .env
 rest.http
 /service.json
+./service.json
+service.json
