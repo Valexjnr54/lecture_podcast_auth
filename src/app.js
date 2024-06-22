@@ -15,6 +15,8 @@ const settingLecturerRouter = require("./routes/Lecturer/settings");
 const settingStudentRouter = require("./routes/Student/studentSettings");
 const settingAdminRouter = require("./routes/Admin/adminSettings");
 const refreshTokenRouter = require("./routes/refreshTokenRoutes");
+const notificationRouter = require("./routes/notificationRoutes");
+
 require("dotenv").config();
 require("./helpers/init_mongoose");
 
@@ -54,6 +56,9 @@ app.use(route + "/student/settings", settingStudentRouter);
 app.use(route + "/admin/settings", settingAdminRouter);
 
 app.use(route + "/search", searchRouter);
+
+app.use(route + "/notification", notificationRouter);
+
 
 app.use(async (req, res, next) => {
   next(createError.NotFound());
